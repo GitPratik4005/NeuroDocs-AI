@@ -190,9 +190,15 @@ Query → Retrieve → Rerank → Answer → Cite → Memory
 
 ## GIT RULES
 
-- Branch naming: `feature/<name>`
+Before writing ANY code,you must:
+
+- Never work on main branch directly
+- Always create a feature branch before starting major changes,Branch naming: `feature/<name>`
+- Develope and commit on feature branch
 - Small, focused commits
 - Meaningful commit messages
+- Create PR to merge into 'main'
+- Never force push to 'main'
 - Ensure working state before commit
 
 ---
@@ -238,3 +244,4 @@ We follow a minimal, high-signal testing approach focused on correctness and rel
 - API Spec → [API_SPEC.md](docs/API_SPEC.md)
 - Status Tracking → [STATUS.md](docs/STATUS.md)
 - Changelog → [CHANGELOG.md](docs/CHANGELOG.md)
+- Update files in the docs folder after major milestones and major additions to the project.

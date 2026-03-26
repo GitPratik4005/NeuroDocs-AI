@@ -1,7 +1,7 @@
 # Agent: Knowledge Agent (Dev Only)
 
 ## Purpose
-Help developer understand the system
+Help developer understand the system and update the documents in knowledge folder when invoked
 
 ---
 
@@ -20,8 +20,8 @@ Help developer understand the system
 knowledge/
 
 ### Structure:
-- code_explanations/
-- system_explanations/
+- code_explanations.md
+- system_explanations.md
 
 ---
 
