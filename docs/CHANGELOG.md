@@ -10,7 +10,35 @@ Format:
 ## [Unreleased]
 
 ### Added
+- Knowledge documentation: code_explanations.md, system_explanations.md
+- .env.example with all required environment variables (DB, ChromaDB, Ollama, JWT, uploads)
+- .env configured with actual connection strings and generated secrets
+
+### Changed
+- CLAUDE.md: added doc links, constraints & policies, build rules, expanded testing strategy
+- commands/update-knowledge.md: updated to write to single files (code_explanations.md, system_explanations.md)
+- agents/knowledge_agent.md: aligned output structure with update-knowledge command
+
+---
+
+## [0.0.1] — 2026-03-25
+
+### Added
 - Initial project setup
+- GitHub repo (GitPratik4005/NeuroDocs-AI)
+- CLAUDE.md with operating rules, architecture reference, tech decisions
+- PROJECT_SPEC.md with full PRD, milestones, tech stack, data flows, project structure
+- API_SPEC.md with all MVP endpoint definitions
+- STATUS.md, CHANGELOG.md
+- Commands: build-mvp, build-feature, whats-next, update-knowledge
+- Agents: explore_agent, knowledge_agent
+- Skills: rag_skill, backend_architecture
+- Hooks: post-task.sh
+- .gitignore, README.md
+- Python venv (3.13.0)
+- PostgreSQL 18.3 (port 5433, neurodocai DB)
+- ChromaDB 1.5.5 (embedded)
+- Ollama models: llama3, nomic-embed-text
 
 ---
 
