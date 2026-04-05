@@ -3,6 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from core.config import settings
 from core.database import engine, Base
+import models.user  # noqa: F401 — register User model for table creation
+from api.auth import router as auth_router
 
 app = FastAPI(title=settings.APP_NAME)
 
@@ -18,6 +20,9 @@ app.add_middleware(
 @app.on_event("startup")
 def on_startup():
     Base.metadata.create_all(bind=engine)
+
+
+app.include_router(auth_router)
 
 
 @app.get("/")
