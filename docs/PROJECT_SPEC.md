@@ -63,6 +63,7 @@ NeuroDocAI allows users to:
 
 ### 🟡 V1 (Enhanced System)
 
+- CSV and XLSX file support (tabular data extraction and chunking)
 - OCR support for image-based documents
 - Smart chunking (semantic + overlapping)
 - Hybrid search:

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 # NeuroDocAI — AI Document Intelligence System
 
-RAG-based system that lets users upload documents (PDF, DOCX), extract and embed content, then ask natural language questions with cited answers. Generates summaries, key insights, and action suggestions.
+RAG-based system that lets users upload documents (PDF, DOCX; CSV/XLSX in V1), extract and embed content, then ask natural language questions with cited answers. Generates summaries, key insights, and action suggestions.
 
 ---
 
