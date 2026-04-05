@@ -3,7 +3,7 @@ import uuid
 import shutil
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException, status
+from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException, status, BackgroundTasks
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -12,6 +12,7 @@ from core.database import get_db
 from core.security import get_current_user
 from models.user import User
 from models.document import Document
+from pipelines.ingestion_pipeline import run_ingestion
 
 router = APIRouter(prefix="/api/upload", tags=["upload"])
 
@@ -41,8 +42,19 @@ class DocumentListResponse(BaseModel):
 
 # --- Routes ---
 
+def _run_ingestion_background(document_id: str):
+    """Run ingestion in a background task with its own DB session."""
+    from core.database import SessionLocal
+    db = SessionLocal()
+    try:
+        run_ingestion(db, document_id)
+    finally:
+        db.close()
+
+
 @router.post("", response_model=DocumentResponse, status_code=201)
 def upload_document(
+    background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     title: str = Form(None),
     db: Session = Depends(get_db),
@@ -83,6 +95,8 @@ def upload_document(
     db.add(doc)
     db.commit()
     db.refresh(doc)
+
+    background_tasks.add_task(_run_ingestion_background, doc.id)
     return doc
 
 

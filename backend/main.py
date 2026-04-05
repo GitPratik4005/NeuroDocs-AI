@@ -5,6 +5,7 @@ from core.config import settings
 from core.database import engine, Base
 import models.user  # noqa: F401 — register User model for table creation
 import models.document  # noqa: F401
+import models.chunk  # noqa: F401
 from api.auth import router as auth_router
 from api.upload import router as upload_router
 
