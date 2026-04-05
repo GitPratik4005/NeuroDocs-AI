@@ -10,12 +10,19 @@ Format:
 ## [Unreleased]
 
 ### Added
+- **Backend skeleton**: FastAPI app with CORS, Pydantic Settings config, SQLAlchemy database setup
+- **Auth system**: User model, JWT auth (bcrypt), register/login/me endpoints
+- **Document upload**: Document model, POST/GET/DELETE endpoints, file type and size validation
+- **Text extraction**: PDF extraction (PyMuPDF), DOCX extraction (python-docx), dispatcher
+- **Ingestion pipeline**: Chunk model, Ollama embedding service, chunking (500/50 overlap), ChromaDB storage, background task trigger
+- **RAG query pipeline**: QueryRecord model, semantic retrieval from ChromaDB, Ollama LLM answer generation, query history endpoint
 - Knowledge documentation: code_explanations.md, system_explanations.md
 - .env.example with all required environment variables (DB, ChromaDB, Ollama, JWT, uploads)
 - .env configured with actual connection strings and generated secrets
+- CSV/XLSX file support added to V1 roadmap
 
 ### Changed
-- CLAUDE.md: added doc links, constraints & policies, build rules, expanded testing strategy
+- CLAUDE.md: added doc links, constraints & policies, build rules, expanded testing strategy, CSV/XLSX V1 note
 - commands/update-knowledge.md: updated to write to single files (code_explanations.md, system_explanations.md)
 - agents/knowledge_agent.md: aligned output structure with update-knowledge command
 
