@@ -96,6 +96,7 @@ Upload a document (PDF or DOCX). Requires auth.
   "title": "document.pdf",
   "file_type": "pdf",
   "status": "processing",
+  "chunk_count": 0,
   "uploaded_at": "2026-03-24T00:00:00Z"
 }
 ```
@@ -115,7 +116,7 @@ List user's uploaded documents. Requires auth.
 |-------|------|---------|-------------|
 | page | int | 1 | Page number |
 | limit | int | 10 | Items per page |
-| status | string | all | Filter: processing, ready, failed |
+| status_filter | string | all | Filter: processing, ready, failed |
 
 **Response (200):**
 ```json
@@ -180,8 +181,7 @@ Ask a question about uploaded documents. Requires auth.
 ```json
 {
   "question": "What are the key findings?",
-  "document_ids": ["uuid1", "uuid2"],
-  "top_k": 5
+  "document_ids": ["uuid1", "uuid2"]
 }
 ```
 
@@ -189,22 +189,16 @@ Ask a question about uploaded documents. Requires auth.
 |-------|------|----------|-------------|
 | question | string | yes | Natural language question |
 | document_ids | list[str] | no | Scope to specific documents (default: all user docs) |
-| top_k | int | no | Number of chunks to retrieve (default: 5) |
 
 **Response (200):**
 ```json
 {
+  "id": "uuid",
+  "question": "What are the key findings?",
   "answer": "The key findings include...",
-  "sources": [
-    {
-      "document_id": "uuid",
-      "document_title": "report.pdf",
-      "chunk_text": "relevant excerpt...",
-      "page_number": 3,
-      "relevance_score": 0.92
-    }
-  ],
-  "query_id": "uuid"
+  "source_chunks": ["chunk-id-1", "chunk-id-2"],
+  "document_ids": ["uuid1"],
+  "created_at": "2026-03-24T00:00:00Z"
 }
 ```
 
@@ -220,8 +214,7 @@ Get user's query history. Requires auth.
 | Param | Type | Default | Description |
 |-------|------|---------|-------------|
 | page | int | 1 | Page number |
-| limit | int | 20 | Items per page |
-| document_id | string | all | Filter by document |
+| limit | int | 10 | Items per page |
 
 **Response (200):**
 ```json
@@ -231,12 +224,14 @@ Get user's query history. Requires auth.
       "id": "uuid",
       "question": "What are the key findings?",
       "answer": "The key findings include...",
+      "source_chunks": ["chunk-id-1"],
+      "document_ids": ["uuid1"],
       "created_at": "2026-03-24T00:00:00Z"
     }
   ],
   "total": 1,
   "page": 1,
-  "limit": 20
+  "limit": 10
 }
 ```
 
