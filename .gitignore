@@ -34,6 +34,15 @@ docker/data/
 .coverage
 htmlcov/
 .pytest_cache/
+test.db
+
+# User data
+uploads/
+backend/uploads/
+backend/chroma_data/
+
+# Claude Code local settings
+.claude/settings.local.json
 
 # Knowledge (generated, can be regenerated)
 knowledge/code_explanations/

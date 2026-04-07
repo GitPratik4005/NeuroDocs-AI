@@ -2,8 +2,9 @@ import os
 import uuid
 import shutil
 from datetime import datetime
+from typing import Optional
 
-from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException, status, BackgroundTasks
+from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException, Query, status, BackgroundTasks
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -104,7 +105,7 @@ def upload_document(
 def list_documents(
     page: int = 1,
     limit: int = 10,
-    status_filter: str = None,
+    status_filter: Optional[str] = Query(None),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -116,7 +117,7 @@ def list_documents(
     documents = query.order_by(Document.uploaded_at.desc()).offset((page - 1) * limit).limit(limit).all()
 
     return DocumentListResponse(
-        documents=documents,
+        documents=[DocumentResponse.model_validate(doc) for doc in documents],
         total=total,
         page=page,
         limit=limit,

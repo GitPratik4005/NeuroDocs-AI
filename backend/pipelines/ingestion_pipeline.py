@@ -23,23 +23,44 @@ def chunk_text(text: str, chunk_size: int = CHUNK_SIZE, overlap: int = CHUNK_OVE
     chunks = []
     start = 0
     text_len = len(text)
+    min_chunk_size = 100  # avoid tiny chunks
 
     while start < text_len:
-        end = start + chunk_size
+        end = min(start + chunk_size, text_len)
 
         if end < text_len:
-            # Try to break at sentence boundary (. ! ?)
-            boundary = text.rfind(".", start, end)
+            # Try to break at sentence-ending period (followed by space or newline)
+            boundary = -1
+            search_end = end
+            while search_end > start + min_chunk_size:
+                pos = text.rfind(".", start + min_chunk_size, search_end)
+                if pos == -1:
+                    break
+                # Check if it's a real sentence boundary (followed by space, newline, or end)
+                next_char_pos = pos + 1
+                if next_char_pos >= text_len or text[next_char_pos] in (" ", "\n", "\r"):
+                    boundary = pos
+                    break
+                search_end = pos
+
             if boundary == -1:
-                boundary = text.rfind(" ", start, end)
-            if boundary > start:
+                # Fall back to newline break
+                boundary = text.rfind("\n", start + min_chunk_size, end)
+            if boundary == -1:
+                # Fall back to space break
+                boundary = text.rfind(" ", start + min_chunk_size, end)
+            if boundary > start + min_chunk_size:
                 end = boundary + 1
 
         chunk = text[start:end].strip()
         if chunk:
             chunks.append(chunk)
 
-        start = end - overlap if end < text_len else text_len
+        # Ensure start always moves forward
+        next_start = end - overlap if end < text_len else text_len
+        if next_start <= start:
+            next_start = start + 1
+        start = next_start
 
     return chunks
 
