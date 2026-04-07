@@ -6,6 +6,12 @@ from core.security import hash_password, verify_password, create_access_token
 
 
 def register_user(db: Session, email: str, password: str, name: str) -> User:
+    if len(password) < 8:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Password must be at least 8 characters",
+        )
+
     existing = db.query(User).filter(User.email == email).first()
     if existing:
         raise HTTPException(

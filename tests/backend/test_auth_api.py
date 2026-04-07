@@ -4,7 +4,7 @@
 def test_register_success(client):
     resp = client.post("/api/auth/register", json={
         "email": "new@example.com",
-        "password": "pass123",
+        "password": "pass12345",
         "name": "New User",
     })
     assert resp.status_code == 201
@@ -16,11 +16,21 @@ def test_register_success(client):
 
 
 def test_register_duplicate_email(client):
-    payload = {"email": "dup@example.com", "password": "pass123", "name": "User"}
+    payload = {"email": "dup@example.com", "password": "pass12345", "name": "User"}
     client.post("/api/auth/register", json=payload)
     resp = client.post("/api/auth/register", json=payload)
     assert resp.status_code == 400
     assert "already registered" in resp.json()["detail"].lower()
+
+
+def test_register_short_password(client):
+    resp = client.post("/api/auth/register", json={
+        "email": "short@example.com",
+        "password": "abc",
+        "name": "User",
+    })
+    assert resp.status_code == 400
+    assert "8 characters" in resp.json()["detail"]
 
 
 def test_register_missing_fields(client):
@@ -31,12 +41,12 @@ def test_register_missing_fields(client):
 def test_login_success(client):
     client.post("/api/auth/register", json={
         "email": "login@example.com",
-        "password": "pass123",
+        "password": "pass12345",
         "name": "Login User",
     })
     resp = client.post("/api/auth/login", json={
         "email": "login@example.com",
-        "password": "pass123",
+        "password": "pass12345",
     })
     assert resp.status_code == 200
     data = resp.json()
@@ -47,12 +57,12 @@ def test_login_success(client):
 def test_login_wrong_password(client):
     client.post("/api/auth/register", json={
         "email": "wrong@example.com",
-        "password": "correct",
+        "password": "correct123",
         "name": "User",
     })
     resp = client.post("/api/auth/login", json={
         "email": "wrong@example.com",
-        "password": "incorrect",
+        "password": "incorrect1",
     })
     assert resp.status_code == 401
 

@@ -13,7 +13,7 @@ class Settings(BaseSettings):
 
     # ChromaDB
     CHROMA_HOST: str = "localhost"
-    CHROMA_PORT: int = 8000
+    CHROMA_PORT: int = 8100
 
     # Ollama
     OLLAMA_BASE_URL: str = "http://localhost:11434"

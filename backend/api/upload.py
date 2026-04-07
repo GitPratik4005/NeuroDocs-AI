@@ -1,12 +1,15 @@
 import os
 import uuid
 import shutil
+import logging
 from datetime import datetime
 from typing import Optional
 
 from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException, Query, status, BackgroundTasks
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
+
+logger = logging.getLogger(__name__)
 
 from core.config import settings
 from core.database import get_db
@@ -49,6 +52,8 @@ def _run_ingestion_background(document_id: str):
     db = SessionLocal()
     try:
         run_ingestion(db, document_id)
+    except Exception:
+        logger.exception("Ingestion failed for document %s", document_id)
     finally:
         db.close()
 
