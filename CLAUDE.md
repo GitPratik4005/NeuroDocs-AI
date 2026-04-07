@@ -96,7 +96,7 @@ cd frontend && npm test
 Required services running locally:
 - **PostgreSQL** — structured data (users, documents, queries)
 - **ChromaDB** — vector embeddings
-- **Ollama** — LLM and embeddings (`nomic-embed-text`)
+- **Ollama** — LLM (`phi3`) and embeddings (`nomic-embed-text`)
 
 Configuration via `.env` file at project root (not committed to git).
 
@@ -116,20 +116,32 @@ Configuration via `.env` file at project root (not committed to git).
 | `main.py` | FastAPI app entry point |
 
 ### Frontend (`frontend/`)
-- Next.js App Router with TypeScript
-- Tailwind CSS for styling
+- Next.js 16 App Router with TypeScript
+- Tailwind CSS v4 for styling
 - shadcn/ui for UI components
 
-#### Pages
-- login
-- dashboard
-- upload
-- chat
+#### Pages (Route Groups)
+- `(auth)/login` — public login page
+- `(auth)/register` — public registration page
+- `(app)/dashboard` — document list with status, delete, pagination
+- `(app)/upload` — file upload (PDF/DOCX)
+- `(app)/chat` — Q&A chat interface with source references
 
 #### Structure
-- `components/` → reusable UI components (shadcn-based)
-- `services/api.ts` → backend API calls
-- `lib/` → shared utilities
+- `src/components/` → reusable UI components (shadcn-based) + auth-guard, nav-bar
+- `src/context/auth-context.tsx` → JWT auth state management
+- `src/services/api.ts` → backend API calls (native fetch)
+- `src/types/index.ts` → TypeScript interfaces matching backend schemas
+- `src/lib/` → shared utilities
+
+### Tests (`tests/`)
+- `tests/backend/` → pytest tests (unit + API + RAG)
+  - `conftest.py` — shared fixtures, test DB, test client
+  - `test_auth_api.py` — auth endpoint tests
+  - `test_upload_api.py` — upload endpoint tests
+  - `test_query_api.py` — query endpoint tests (mocked RAG)
+  - `test_chunking.py` — chunking logic unit tests
+  - `test_ocr_service.py` — OCR dispatch unit tests
 
 ---
 
