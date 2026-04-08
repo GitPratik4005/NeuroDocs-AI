@@ -114,6 +114,64 @@ export async function queryDocuments(
   });
 }
 
+export async function queryDocumentsStream(
+  question: string,
+  documentIds: string[],
+  onToken: (token: string) => void,
+  onDone: (id: string) => void,
+): Promise<void> {
+  const res = await fetch(`${API_BASE}/query/stream`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...getAuthHeaders(),
+    },
+    body: JSON.stringify({ question, document_ids: documentIds }),
+  });
+
+  if (res.status === 401) {
+    localStorage.removeItem("token");
+    window.location.href = "/login";
+    throw new Error("Unauthorized");
+  }
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.detail || `Request failed: ${res.status}`);
+  }
+
+  const reader = res.body?.getReader();
+  if (!reader) throw new Error("No response stream");
+
+  const decoder = new TextDecoder();
+  let buffer = "";
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split("\n");
+    buffer = lines.pop() || "";
+
+    for (const line of lines) {
+      if (!line.startsWith("data: ")) continue;
+      const json = line.slice(6).trim();
+      if (!json) continue;
+      try {
+        const event = JSON.parse(json);
+        if (event.type === "token") {
+          onToken(event.content);
+        } else if (event.type === "done") {
+          onDone(event.id);
+        }
+      } catch {
+        // skip malformed lines
+      }
+    }
+  }
+}
+
 export async function getQueryHistory(
   page = 1,
   limit = 10

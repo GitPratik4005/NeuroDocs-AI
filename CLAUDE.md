@@ -119,20 +119,28 @@ Configuration via `.env` file at project root (not committed to git).
 - Next.js 16 App Router with TypeScript
 - Tailwind CSS v4 for styling
 - shadcn/ui for UI components
+- next-themes for dark/light/system theme toggle
+- Default theme: dark (semi-dark premium with violet/blue accent)
 
 #### Pages (Route Groups)
-- `(auth)/login` — public login page
-- `(auth)/register` — public registration page
-- `(app)/dashboard` — document list with status, delete, pagination
-- `(app)/upload` — file upload (PDF/DOCX)
-- `(app)/chat` — Q&A chat interface with source references
+- `(auth)/login` — public login page (dark-themed)
+- `(auth)/register` — public registration page (live password validation)
+- `(app)/dashboard` — main page: hero + drag-drop upload + document list
+- `(app)/chat` — split view: document preview (left 30%) + chat window (right 70%)
+
+#### Chat Features
+- **Streaming responses** — SSE-based token streaming (`/api/query/stream`), renders tokens in real-time
+- Predefined actions: Summarize, Key Points, Change Tone (dropdown: Professional/Casual/Academic/Simple)
+- Queries scoped to selected document via doc_id
+- Auto-scroll, bouncing dots loading animation
 
 #### Structure
-- `src/components/` → reusable UI components (shadcn-based) + auth-guard, nav-bar
+- `src/components/` → UI components (shadcn-based) + auth-guard, nav-bar, theme-provider, theme-toggle, drag-drop-upload
 - `src/context/auth-context.tsx` → JWT auth state management
 - `src/services/api.ts` → backend API calls (native fetch)
 - `src/types/index.ts` → TypeScript interfaces matching backend schemas
 - `src/lib/` → shared utilities
+- `src/__tests__/` → Jest + React Testing Library tests
 
 ### Tests (`tests/`)
 - `tests/backend/` → pytest tests (unit + API + RAG)
@@ -142,6 +150,12 @@ Configuration via `.env` file at project root (not committed to git).
   - `test_query_api.py` — query endpoint tests (mocked RAG)
   - `test_chunking.py` — chunking logic unit tests
   - `test_ocr_service.py` — OCR dispatch unit tests
+- `frontend/src/__tests__/` → Jest + React Testing Library tests
+  - `api.test.ts` — API service layer tests (fetch mock, auth, errors)
+  - `nav-bar.test.tsx` — nav bar rendering, logout, theme toggle
+  - `drag-drop-upload.test.tsx` — file validation, upload flow, drag events
+  - `login.test.tsx` — login form, submission, error handling
+  - `register.test.tsx` — password validation, form submission
 
 ---
 
@@ -152,6 +166,8 @@ Configuration via `.env` file at project root (not committed to git).
 - **ORM**: SQLAlchemy (no Alembic migrations for now)
 - **OCR**: Tesseract (primary)
 - **UI**: Use shadcn/ui components with Tailwind CSS
+- **Theming**: next-themes for dark/light/system toggle (default: dark)
+- **Frontend Testing**: Jest + React Testing Library
 
 ---
 
@@ -196,7 +212,9 @@ Do NOT implement V1/V2 features during MVP phase
 Upload → OCR → Clean → Chunk → Embed → Store
 
 ### Query
-Query → Retrieve → Rerank → Answer → Cite → Memory
+Query → Retrieve → Rerank → Answer (streaming SSE) → Cite → Memory
+- Streaming endpoint: `POST /api/query/stream` returns SSE with `{type: "token", content: "..."}` events
+- Non-streaming endpoint: `POST /api/query` still available for backward compatibility
 
 ---
 

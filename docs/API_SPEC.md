@@ -206,6 +206,32 @@ Ask a question about uploaded documents. Requires auth.
 
 ---
 
+### POST /query/stream
+
+Streaming version of POST /query. Returns Server-Sent Events (SSE) with tokens as they are generated. Requires auth.
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Request Body:** Same as POST /query
+
+**Response (200):** `text/event-stream`
+
+Each event is a JSON object:
+```
+data: {"type": "token", "content": "The"}
+data: {"type": "token", "content": " key"}
+data: {"type": "token", "content": " findings"}
+...
+data: {"type": "done", "id": "query-record-uuid"}
+```
+
+| Event Type | Description |
+|------------|-------------|
+| token | A chunk of the generated answer text |
+| done | Stream complete, includes the saved query record ID |
+
+---
+
 ### GET /query/history
 
 Get user's query history. Requires auth.

@@ -16,6 +16,7 @@ from core.database import get_db
 from core.security import get_current_user
 from models.user import User
 from models.document import Document
+from models.chunk import Chunk
 from pipelines.ingestion_pipeline import run_ingestion
 
 router = APIRouter(prefix="/api/upload", tags=["upload"])
@@ -151,6 +152,19 @@ def delete_document(
     if not doc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
 
+    # Delete related chunks from DB
+    db.query(Chunk).filter(Chunk.document_id == document_id).delete()
+
+    # Clean up ChromaDB embeddings
+    try:
+        import chromadb
+        chroma_client = chromadb.PersistentClient(path=settings.CHROMA_PERSIST_DIR)
+        collection = chroma_client.get_or_create_collection(name="documents")
+        collection.delete(where={"document_id": document_id})
+    except Exception as e:
+        logger.warning(f"Failed to clean ChromaDB for doc {document_id}: {e}")
+
+    # Delete file from disk
     if os.path.exists(doc.file_path):
         os.remove(doc.file_path)
 

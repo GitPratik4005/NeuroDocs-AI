@@ -10,26 +10,47 @@ Format:
 ## [Unreleased]
 
 ### Added
+- **Streaming responses**: SSE-based token streaming for chat answers
+  - Backend `/api/query/stream` endpoint using Ollama streaming API
+  - Frontend reads stream and renders tokens in real-time (ChatGPT/Claude-like UX)
+- **Frontend redesign**: premium single-page experience with dark/light/system theme
+  - Drag-and-drop upload on main dashboard (replaces separate upload page)
+  - Chat split view: document preview panel (left) + chat window (right)
+  - Predefined chat actions: Summarize, Key Points, Change Tone (Professional/Casual/Academic/Simple)
+  - Dark/light/system theme toggle using next-themes
+  - Branded loading states, hover glow effects, bouncing dots animation
+  - Live password requirements indicator on register page
+  - File size validation (10MB max) on client side
+  - Delete confirmation dialog (browser confirm)
+- **Frontend tests**: 31 tests passing (Jest + React Testing Library)
+  - API service, nav bar, drag-drop upload, login, register page tests
 - **Frontend MVP**: Next.js 16 + TypeScript + Tailwind CSS + shadcn/ui
   - Login and Register pages with email/password forms
   - Dashboard page with document table, status badges, pagination, delete
-  - Upload page with file input (PDF/DOCX), optional title, toast feedback
-  - Chat page with Q&A interface, session message history, source references
+  - Chat page with Q&A interface, session message history
   - Auth context with JWT token management and route guards
   - API service layer using native fetch for all backend endpoints
-  - Navbar with navigation links and user info/logout
-- **Backend tests**: 29 tests passing (unit + API + RAG)
+- **Backend tests**: 30 tests passing (unit + API + RAG)
   - Auth API, Upload API, Query API, Chunking, OCR service tests
 
 ### Changed
+- Frontend: single-page architecture (dashboard + upload merged, chat via /chat?doc=id)
+- Frontend: nav bar simplified to logo + theme toggle + user logout (no page links)
+- Frontend: auth pages restyled with premium dark-compatible design
+- Frontend: chat queries now scoped to selected document via doc_id
+- Frontend: violet/blue accent color scheme for futuristic feel
 - Ingestion pipeline: improved chunking with min chunk size (100 chars), smart sentence boundary detection
 - RAG service: increased Ollama LLM timeout from 120s to 300s
 - Upload API: fixed `status_filter` typing, explicit `model_validate` for document list
 - Config: switched default LLM model from llama3 to phi3 for faster responses
 
 ### Fixed
+- Document delete: cascade delete chunks from PostgreSQL and ChromaDB before removing document
 - Chunking bug: periods in abbreviations (e.g., "Next.js") caused tiny duplicate chunks
 - Upload API: `status_filter: str = None` deprecation issue in newer FastAPI
+
+### Removed
+- Separate upload page (merged into dashboard drag-drop zone)
 
 ### Previously Added
 - **Backend skeleton**: FastAPI app with CORS, Pydantic Settings config, SQLAlchemy database setup

@@ -38,11 +38,10 @@ def retrieve_relevant_chunks(
     return results
 
 
-def generate_answer(question: str, context_chunks: list[str]) -> str:
-    """Call Ollama LLM to generate an answer based on retrieved context."""
+def _build_prompt(question: str, context_chunks: list[str]) -> str:
+    """Build the RAG prompt from question and context."""
     context = "\n\n---\n\n".join(context_chunks)
-
-    prompt = f"""You are a helpful document assistant. Answer the user's question based ONLY on the provided context. If the context doesn't contain enough information to answer, say so clearly.
+    return f"""You are a helpful document assistant. Answer the user's question based ONLY on the provided context. If the context doesn't contain enough information to answer, say so clearly.
 
 Context:
 {context}
@@ -50,6 +49,11 @@ Context:
 Question: {question}
 
 Answer:"""
+
+
+def generate_answer(question: str, context_chunks: list[str]) -> str:
+    """Call Ollama LLM to generate an answer (non-streaming)."""
+    prompt = _build_prompt(question, context_chunks)
 
     response = httpx.post(
         f"{settings.OLLAMA_BASE_URL}/api/chat",
@@ -63,3 +67,31 @@ Answer:"""
     response.raise_for_status()
     data = response.json()
     return data["message"]["content"]
+
+
+def generate_answer_stream(question: str, context_chunks: list[str]):
+    """Call Ollama LLM and yield tokens as they stream in."""
+    import json as _json
+
+    prompt = _build_prompt(question, context_chunks)
+
+    with httpx.stream(
+        "POST",
+        f"{settings.OLLAMA_BASE_URL}/api/chat",
+        json={
+            "model": settings.OLLAMA_LLM_MODEL,
+            "messages": [{"role": "user", "content": prompt}],
+            "stream": True,
+        },
+        timeout=300.0,
+    ) as response:
+        response.raise_for_status()
+        for line in response.iter_lines():
+            if not line:
+                continue
+            data = _json.loads(line)
+            content = data.get("message", {}).get("content", "")
+            if content:
+                yield content
+            if data.get("done", False):
+                break
