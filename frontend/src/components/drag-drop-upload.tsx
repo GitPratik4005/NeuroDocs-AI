@@ -12,8 +12,10 @@ import type { DocumentResponse } from "@/types";
 const ACCEPTED_TYPES = [
   "application/pdf",
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "text/csv",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 ];
-const ACCEPTED_EXTENSIONS = [".pdf", ".docx"];
+const ACCEPTED_EXTENSIONS = [".pdf", ".docx", ".csv", ".xlsx"];
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 interface DragDropUploadProps {
@@ -31,7 +33,7 @@ export function DragDropUpload({ onUploadComplete }: DragDropUploadProps) {
   function validateFile(f: File): string | null {
     const ext = f.name.substring(f.name.lastIndexOf(".")).toLowerCase();
     if (!ACCEPTED_EXTENSIONS.includes(ext) && !ACCEPTED_TYPES.includes(f.type)) {
-      return "Only PDF and DOCX files are supported.";
+      return "Only PDF, DOCX, CSV, and XLSX files are supported.";
     }
     if (f.size > MAX_FILE_SIZE) {
       return `File too large (${(f.size / 1024 / 1024).toFixed(1)}MB). Max 10MB.`;
@@ -115,7 +117,7 @@ export function DragDropUpload({ onUploadComplete }: DragDropUploadProps) {
         <input
           ref={inputRef}
           type="file"
-          accept=".pdf,.docx"
+          accept=".pdf,.docx,.csv,.xlsx"
           className="hidden"
           onChange={(e) => {
             const f = e.target.files?.[0];
@@ -152,7 +154,7 @@ export function DragDropUpload({ onUploadComplete }: DragDropUploadProps) {
                 Drag & drop your document here
               </p>
               <p className="text-sm text-muted-foreground">
-                or click to browse — PDF, DOCX up to 10MB
+                or click to browse — PDF, DOCX, CSV, XLSX up to 10MB
               </p>
             </div>
           </>

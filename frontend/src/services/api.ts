@@ -5,6 +5,10 @@ import type {
   DocumentListResponse,
   QueryResponse,
   QueryHistoryResponse,
+  ConversationResponse,
+  ConversationListResponse,
+  ConversationMessage,
+  MessageListResponse,
 } from "@/types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
@@ -178,4 +182,48 @@ export async function getQueryHistory(
 ): Promise<QueryHistoryResponse> {
   const params = new URLSearchParams({ page: String(page), limit: String(limit) });
   return request<QueryHistoryResponse>(`/query/history?${params}`);
+}
+
+// Conversations
+export async function listConversations(
+  docId?: string
+): Promise<ConversationListResponse> {
+  const params = new URLSearchParams();
+  if (docId) params.set("doc_id", docId);
+  return request<ConversationListResponse>(`/conversations?${params}`);
+}
+
+export async function createConversation(
+  documentId: string,
+  title?: string
+): Promise<ConversationResponse> {
+  return request<ConversationResponse>("/conversations", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ document_id: documentId, title }),
+  });
+}
+
+export async function getConversationMessages(
+  conversationId: string
+): Promise<MessageListResponse> {
+  return request<MessageListResponse>(`/conversations/${conversationId}/messages`);
+}
+
+export async function addConversationMessage(
+  conversationId: string,
+  role: "user" | "assistant",
+  content: string
+): Promise<ConversationMessage> {
+  return request<ConversationMessage>(`/conversations/${conversationId}/messages`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ role, content }),
+  });
+}
+
+export async function deleteConversation(
+  conversationId: string
+): Promise<void> {
+  return request<void>(`/conversations/${conversationId}`, { method: "DELETE" });
 }

@@ -2,8 +2,16 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { queryDocumentsStream, getDocument } from "@/services/api";
-import type { DocumentResponse } from "@/types";
+import {
+  queryDocumentsStream,
+  getDocument,
+  listConversations,
+  createConversation,
+  getConversationMessages,
+  addConversationMessage,
+  deleteConversation,
+} from "@/services/api";
+import type { DocumentResponse, ConversationResponse } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +25,9 @@ import {
   Sparkles,
   ListChecks,
   ChevronDown,
+  Plus,
+  MessageSquare,
+  Trash2,
 } from "lucide-react";
 
 interface Message {
@@ -45,6 +56,11 @@ export default function ChatPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const toneRef = useRef<HTMLDivElement>(null);
 
+  // Conversation state
+  const [conversations, setConversations] = useState<ConversationResponse[]>([]);
+  const [activeConvId, setActiveConvId] = useState<string | null>(null);
+  const [convsLoading, setConvsLoading] = useState(true);
+
   // Load document info
   useEffect(() => {
     if (!docId) {
@@ -59,6 +75,22 @@ export default function ChatPage() {
       })
       .finally(() => setDocLoading(false));
   }, [docId, router]);
+
+  // Load conversations for this document
+  useEffect(() => {
+    if (!docId) return;
+    setConvsLoading(true);
+    listConversations(docId)
+      .then((data) => {
+        setConversations(data.conversations);
+        // Auto-select the most recent conversation
+        if (data.conversations.length > 0 && !activeConvId) {
+          loadConversation(data.conversations[0].id);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setConvsLoading(false));
+  }, [docId]);
 
   // Auto-scroll on new messages
   useEffect(() => {
@@ -76,23 +108,73 @@ export default function ChatPage() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
+  async function loadConversation(convId: string) {
+    setActiveConvId(convId);
+    try {
+      const data = await getConversationMessages(convId);
+      setMessages(
+        data.messages.map((m) => ({ role: m.role as "user" | "assistant", content: m.content }))
+      );
+    } catch {
+      setMessages([]);
+    }
+  }
+
+  async function startNewConversation() {
+    if (!docId) return;
+    try {
+      const conv = await createConversation(docId);
+      setConversations((prev) => [conv, ...prev]);
+      setActiveConvId(conv.id);
+      setMessages([]);
+    } catch {}
+  }
+
+  async function handleDeleteConversation(convId: string) {
+    if (!confirm("Delete this conversation?")) return;
+    try {
+      await deleteConversation(convId);
+      setConversations((prev) => prev.filter((c) => c.id !== convId));
+      if (activeConvId === convId) {
+        setActiveConvId(null);
+        setMessages([]);
+      }
+    } catch {}
+  }
+
   const sendMessage = useCallback(async (text: string) => {
     if (!text.trim() || loading || !docId) return;
+
+    // Ensure we have a conversation
+    let convId = activeConvId;
+    if (!convId) {
+      try {
+        const conv = await createConversation(docId);
+        setConversations((prev) => [conv, ...prev]);
+        convId = conv.id;
+        setActiveConvId(conv.id);
+      } catch {
+        return;
+      }
+    }
 
     setMessages((prev) => [...prev, { role: "user", content: text }]);
     setQuestion("");
     setLoading(true);
 
-    // Add empty assistant message that will be filled by streaming tokens
-    const assistantIndex = messages.length + 1; // +1 for the user message we just added
+    // Save user message to backend
+    addConversationMessage(convId, "user", text).catch(() => {});
+
+    // Add empty assistant message for streaming
     setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
 
+    let fullAnswer = "";
     try {
       await queryDocumentsStream(
         text,
         [docId],
         (token) => {
-          // Append each token to the assistant message
+          fullAnswer += token;
           setMessages((prev) => {
             const updated = [...prev];
             const last = updated[updated.length - 1];
@@ -102,10 +184,12 @@ export default function ChatPage() {
             return updated;
           });
         },
-        () => {
-          // Stream complete
-        },
+        () => {},
       );
+      // Save assistant response to backend
+      if (convId && fullAnswer) {
+        addConversationMessage(convId, "assistant", fullAnswer).catch(() => {});
+      }
     } catch {
       setMessages((prev) => {
         const updated = [...prev];
@@ -118,7 +202,7 @@ export default function ChatPage() {
     } finally {
       setLoading(false);
     }
-  }, [loading, docId, messages.length]);
+  }, [loading, docId, activeConvId]);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -129,7 +213,7 @@ export default function ChatPage() {
 
   return (
     <div className="flex h-[calc(100vh-5rem)] gap-0 overflow-hidden rounded-xl border">
-      {/* Left Panel — Document Preview */}
+      {/* Left Panel — Document Preview + Conversations */}
       <aside className="hidden md:flex w-[280px] shrink-0 flex-col border-r bg-muted/30">
         <div className="flex items-center gap-2 border-b p-4">
           <Button
@@ -179,6 +263,61 @@ export default function ChatPage() {
             </div>
           </div>
         ) : null}
+
+        {/* Conversation List */}
+        <div className="border-t flex-1 overflow-y-auto">
+          <div className="flex items-center justify-between p-3">
+            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Chats</span>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 cursor-pointer"
+              onClick={startNewConversation}
+              aria-label="New conversation"
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+          </div>
+
+          {convsLoading ? (
+            <div className="px-3 space-y-2">
+              <Skeleton className="h-8 w-full" />
+              <Skeleton className="h-8 w-full" />
+            </div>
+          ) : conversations.length === 0 ? (
+            <p className="px-3 text-xs text-muted-foreground">No conversations yet. Start chatting!</p>
+          ) : (
+            <div className="px-2 space-y-1">
+              {conversations.map((conv) => (
+                <div
+                  key={conv.id}
+                  className={`group flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors ${
+                    activeConvId === conv.id
+                      ? "bg-primary/10 text-primary"
+                      : "hover:bg-accent"
+                  }`}
+                  onClick={() => loadConversation(conv.id)}
+                >
+                  <MessageSquare className="h-3.5 w-3.5 shrink-0" />
+                  <span className="truncate flex-1">{conv.title}</span>
+                  <span className="text-xs text-muted-foreground shrink-0">{conv.message_count}</span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 opacity-0 group-hover:opacity-100 cursor-pointer shrink-0"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteConversation(conv.id);
+                    }}
+                    aria-label="Delete conversation"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </aside>
 
       {/* Right Panel — Chat */}
