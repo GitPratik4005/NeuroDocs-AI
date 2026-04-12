@@ -7,7 +7,7 @@ import json
 from sqlalchemy.orm import Session
 
 from models.query import QueryRecord
-from services.rag_service import retrieve_relevant_chunks, generate_answer, generate_answer_stream
+from services.rag_service import hybrid_retrieve, generate_answer, generate_answer_stream
 
 
 def run_query(
@@ -18,7 +18,7 @@ def run_query(
 ) -> dict:
     """Run the full RAG query pipeline."""
     # Step 1: Retrieve relevant chunks
-    results = retrieve_relevant_chunks(question, user_id, document_ids=document_ids)
+    results = hybrid_retrieve(question, user_id, document_ids=document_ids)
 
     context_chunks = results["documents"][0] if results["documents"] else []
     metadatas = results["metadatas"][0] if results["metadatas"] else []
@@ -64,7 +64,7 @@ def run_query_stream(
 ):
     """Run RAG query pipeline with streaming answer generation. Yields SSE data chunks."""
     # Step 1: Retrieve relevant chunks
-    results = retrieve_relevant_chunks(question, user_id, document_ids=document_ids)
+    results = hybrid_retrieve(question, user_id, document_ids=document_ids)
 
     context_chunks = results["documents"][0] if results["documents"] else []
     metadatas = results["metadatas"][0] if results["metadatas"] else []
