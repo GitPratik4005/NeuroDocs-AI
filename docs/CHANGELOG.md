@@ -9,7 +9,40 @@ Format:
 
 ## [Unreleased]
 
-### Added
+### Added (V1)
+- **CSV/XLSX file support**: upload and query tabular data files
+  - `csv_extractor.py` — converts CSV rows to readable pipe-separated text
+  - XLSX extraction reads all sheets with sheet name headers
+  - Updated upload API, frontend drag-drop to accept .csv/.xlsx
+- **OCR Tesseract fallback**: scanned PDFs now extract text via OCR
+  - Detects pages with <50 chars text as scanned
+  - Falls back to PyMuPDF pixmap → PIL → pytesseract
+  - Gracefully skips if pytesseract not installed
+- **Smart chunking**: heading/paragraph-aware text splitting
+  - Detects Markdown headings, numbered sections, ALL CAPS headings
+  - Keeps headings attached to following content
+  - Splits oversized paragraphs at sentence boundaries
+  - CSV/XLSX uses naive chunking; PDF/DOCX uses smart chunking
+- **Hybrid search**: vector + BM25 keyword search with Reciprocal Rank Fusion
+  - `keyword_search.py` — in-memory BM25Okapi search over chunk texts
+  - RRF fusion: `1/(k + rank_vector) + 1/(k + rank_bm25)` with k=60
+  - Retrieves 4x candidates, fuses scores, selects top results
+- **LLM-based reranking**: Ollama reranks top chunks by relevance
+  - `reranker.py` — prompts LLM to rank passages, parses numbered response
+  - Falls back to hybrid scores if LLM fails
+- **Conversation storage**: persistent chat sessions per document
+  - `Conversation` + `ConversationMessage` models (PostgreSQL)
+  - `GET/POST/DELETE /api/conversations` + message endpoints
+  - Frontend: conversation list in sidebar, auto-create, resume, delete
+  - Messages saved to backend after each exchange
+- **V1 tests**: 48 unit tests (CSV extractor, OCR dispatch, smart chunking, BM25, reranker)
+
+### Changed (V1)
+- Query pipeline now uses hybrid_retrieve → rerank → generate_answer
+- Ingestion pipeline uses smart_chunk for PDF/DOCX, chunk_text for CSV/XLSX
+- Chunking logic extracted from ingestion_pipeline.py to chunking_service.py
+
+### Added (MVP — previously)
 - **Streaming responses**: SSE-based token streaming for chat answers
   - Backend `/api/query/stream` endpoint using Ollama streaming API
   - Frontend reads stream and renders tokens in real-time (ChatGPT/Claude-like UX)

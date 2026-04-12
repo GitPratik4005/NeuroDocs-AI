@@ -3,7 +3,7 @@
 ---
 
 ## Current Phase
-MVP
+V1
 
 ---
 
@@ -60,21 +60,41 @@ MVP
 
 ---
 
+- **V1: CSV/XLSX file support** — extraction, upload, chunking for tabular data
+- **V1: OCR Tesseract fallback** — scanned PDF text extraction via PyMuPDF + pytesseract
+- **V1: Smart chunking** — heading/paragraph-aware chunking, structure-preserving splits
+- **V1: Hybrid search** — BM25 keyword search + vector search with Reciprocal Rank Fusion
+- **V1: LLM-based reranking** — Ollama reranks retrieved chunks by relevance before answer generation
+- **V1: Conversation storage** — persistent chat sessions per document (create, resume, delete)
+  - Backend: Conversation + ConversationMessage models, CRUD API
+  - Frontend: conversation list in sidebar, auto-create, load history, save messages
+- **V1 tests** — 48 unit tests passing (CSV, OCR, smart chunking, BM25, reranker)
+
+---
+
 ## In Progress
 - None
 
 ---
 
-## V1 Scope (Next Phase)
-1. Conversation storage — save/resume chat sessions per document
-2. CSV/XLSX file support
-3. Auto-generated document summaries on upload
-4. Key insights extraction
-5. Query history page
+## V2 Scope (Next Phase)
+1. Auto-generated document summaries on upload
+2. Key insights extraction
+3. Query history page
+4. Multi-agent system (Ingestion, Retriever, QA, Summarizer agents)
+5. PostgreSQL tsvector for persistent keyword search (replace in-memory BM25)
 
 ---
 
-## Next (MVP Scope)
+## V1 Scope (Completed)
+1. ~~CSV/XLSX file support~~ ✓
+2. ~~OCR Tesseract fallback~~ ✓
+3. ~~Smart chunking~~ ✓
+4. ~~Hybrid search (vector + BM25)~~ ✓
+5. ~~LLM-based reranking~~ ✓
+6. ~~Conversation storage~~ ✓
+
+## MVP Scope (Completed)
 1. ~~Backend skeleton~~ ✓
 2. ~~Auth system~~ ✓
 3. ~~Upload API~~ ✓

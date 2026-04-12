@@ -263,7 +263,126 @@ Get user's query history. Requires auth.
 
 ---
 
-## Insights (V1+)
+## Conversations
+
+### GET /conversations
+
+List conversations for the current user. Requires auth.
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Query Parameters:**
+| Param | Type | Default | Description |
+|-------|------|---------|-------------|
+| doc_id | string | null | Filter by document ID |
+
+**Response (200):**
+```json
+{
+  "conversations": [
+    {
+      "id": "uuid",
+      "document_id": "uuid",
+      "title": "Chat — document.pdf",
+      "created_at": "2026-04-09T00:00:00Z",
+      "updated_at": "2026-04-09T00:00:00Z",
+      "message_count": 5
+    }
+  ],
+  "total": 1
+}
+```
+
+---
+
+### POST /conversations
+
+Create a new conversation. Requires auth.
+
+**Request Body:**
+```json
+{
+  "document_id": "uuid",
+  "title": "Optional custom title"
+}
+```
+
+**Response (201):**
+```json
+{
+  "id": "uuid",
+  "document_id": "uuid",
+  "title": "Chat — document.pdf",
+  "created_at": "2026-04-09T00:00:00Z",
+  "updated_at": "2026-04-09T00:00:00Z",
+  "message_count": 0
+}
+```
+
+**Errors:** `404` document not found
+
+---
+
+### GET /conversations/{conversation_id}/messages
+
+Get all messages for a conversation. Requires auth.
+
+**Response (200):**
+```json
+{
+  "messages": [
+    {
+      "id": "uuid",
+      "conversation_id": "uuid",
+      "role": "user",
+      "content": "What is this about?",
+      "created_at": "2026-04-09T00:00:00Z"
+    },
+    {
+      "id": "uuid",
+      "conversation_id": "uuid",
+      "role": "assistant",
+      "content": "This document is about...",
+      "created_at": "2026-04-09T00:00:00Z"
+    }
+  ],
+  "total": 2
+}
+```
+
+**Errors:** `404` conversation not found
+
+---
+
+### POST /conversations/{conversation_id}/messages
+
+Add a message to a conversation. Requires auth.
+
+**Request Body:**
+```json
+{
+  "role": "user",
+  "content": "What are the key findings?"
+}
+```
+
+**Response (201):** Single message object
+
+**Errors:** `400` invalid role, `404` conversation not found
+
+---
+
+### DELETE /conversations/{conversation_id}
+
+Delete a conversation and its messages. Requires auth.
+
+**Response (204):** No content
+
+**Errors:** `404` conversation not found
+
+---
+
+## Insights (V2+)
 
 ### GET /insights/{document_id}
 

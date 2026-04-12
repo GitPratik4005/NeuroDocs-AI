@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 # NeuroDocAI — AI Document Intelligence System
 
-RAG-based system that lets users upload documents (PDF, DOCX; CSV/XLSX in V1), extract and embed content, then ask natural language questions with cited answers. Generates summaries, key insights, and action suggestions.
+RAG-based system that lets users upload documents (PDF, DOCX, CSV, XLSX), extract and embed content, then ask natural language questions with cited answers. Features hybrid search (vector + BM25), LLM reranking, and persistent conversations.
 
 ---
 
@@ -45,7 +45,7 @@ Every task MUST follow:
 
 Follow strict phases: **MVP → V1 → V2 → Future**
 
-DO NOT skip phases. Current milestone: **MVP**
+DO NOT skip phases. Current milestone: **V1** (complete)
 
 ---
 
@@ -107,11 +107,11 @@ Configuration via `.env` file at project root (not committed to git).
 ### Backend (`backend/`)
 | Directory | Purpose |
 |-----------|---------|
-| `api/` | FastAPI route handlers (auth, upload, query, insights) |
-| `services/` | Business logic (auth, OCR, embeddings, RAG) |
+| `api/` | FastAPI route handlers (auth, upload, query, conversations) |
+| `services/` | Business logic (OCR, CSV extraction, embeddings, RAG, BM25 search, reranker, chunking) |
 | `pipelines/` | Orchestrated flows (ingestion, query) |
 | `agents/` | Custom multi-agent system (V2 scope) |
-| `models/` | SQLAlchemy DB models (User, Document, Chunk, Query) |
+| `models/` | SQLAlchemy DB models (User, Document, Chunk, Query, Conversation, ConversationMessage) |
 | `core/` | Config, database, security, orchestrator |
 | `main.py` | FastAPI app entry point |
 
@@ -130,6 +130,7 @@ Configuration via `.env` file at project root (not committed to git).
 
 #### Chat Features
 - **Streaming responses** — SSE-based token streaming (`/api/query/stream`), renders tokens in real-time
+- **Conversation persistence** — sessions saved per document, resume from sidebar
 - Predefined actions: Summarize, Key Points, Change Tone (dropdown: Professional/Casual/Academic/Simple)
 - Queries scoped to selected document via doc_id
 - Auto-scroll, bouncing dots loading animation
@@ -164,7 +165,10 @@ Configuration via `.env` file at project root (not committed to git).
 - **Embeddings**: Ollama `nomic-embed-text` only — no cloud fallback
 - **Agents**: Custom-built — no LangChain/CrewAI
 - **ORM**: SQLAlchemy (no Alembic migrations for now)
-- **OCR**: Tesseract (primary)
+- **OCR**: PyMuPDF (primary) + Tesseract fallback for scanned PDFs
+- **Keyword Search**: rank_bm25 in-memory (migrate to PostgreSQL tsvector in V2 if needed)
+- **Retrieval**: Hybrid (vector + BM25 RRF) → LLM reranking → answer generation
+- **Chunking**: Smart (heading/paragraph-aware) for PDF/DOCX, naive for CSV/XLSX
 - **UI**: Use shadcn/ui components with Tailwind CSS
 - **Theming**: next-themes for dark/light/system toggle (default: dark)
 - **Frontend Testing**: Jest + React Testing Library
@@ -183,14 +187,14 @@ api / services / agents / pipelines
 -No monolithic files
 -Follow modular architecture
 -Build incrementally (avoid large code dumps)
--Follow MVP scope strictly
+-Follow current phase scope strictly
 
 ### BUILD RULES
 
 Implement features step-by-step (NOT entire system at once)
 Always confirm plan before coding
 Validate each step before proceeding
-Do NOT implement V1/V2 features during MVP phase
+Do NOT implement features from future phases
 
 ## AGENTS (V2 SCOPE)
 
@@ -209,12 +213,13 @@ Do NOT implement V1/V2 features during MVP phase
 ## PIPELINES
 
 ### Ingestion
-Upload → OCR → Clean → Chunk → Embed → Store
+Upload → Extract (PDF/DOCX/CSV/XLSX + OCR fallback) → Smart Chunk (or naive for CSV/XLSX) → Embed → Store
 
 ### Query
-Query → Retrieve → Rerank → Answer (streaming SSE) → Cite → Memory
+Query → Hybrid Retrieve (Vector + BM25 RRF) → LLM Rerank → Generate Answer (streaming SSE) → Save to Conversation
 - Streaming endpoint: `POST /api/query/stream` returns SSE with `{type: "token", content: "..."}` events
 - Non-streaming endpoint: `POST /api/query` still available for backward compatibility
+- Conversations: `GET/POST/DELETE /api/conversations` + messages endpoints
 
 ---
 
