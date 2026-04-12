@@ -17,12 +17,18 @@ from core.security import get_current_user
 from models.user import User
 from models.document import Document
 from models.chunk import Chunk
+from models.conversation import Conversation, ConversationMessage
 from pipelines.ingestion_pipeline import run_ingestion
 
 router = APIRouter(prefix="/api/upload", tags=["upload"])
 
-ALLOWED_TYPES = {"pdf": "application/pdf", "docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"}
-ALLOWED_EXTENSIONS = {"pdf", "docx"}
+ALLOWED_TYPES = {
+    "pdf": "application/pdf",
+    "docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "csv": "text/csv",
+    "xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+}
+ALLOWED_EXTENSIONS = {"pdf", "docx", "csv", "xlsx"}
 
 
 # --- Schemas ---
@@ -152,14 +158,19 @@ def delete_document(
     if not doc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
 
+    # Delete related conversations and their messages
+    conv_ids = [c.id for c in db.query(Conversation).filter(Conversation.document_id == document_id).all()]
+    if conv_ids:
+        db.query(ConversationMessage).filter(ConversationMessage.conversation_id.in_(conv_ids)).delete()
+        db.query(Conversation).filter(Conversation.document_id == document_id).delete()
+
     # Delete related chunks from DB
     db.query(Chunk).filter(Chunk.document_id == document_id).delete()
 
     # Clean up ChromaDB embeddings
     try:
-        import chromadb
-        chroma_client = chromadb.PersistentClient(path=settings.CHROMA_PERSIST_DIR)
-        collection = chroma_client.get_or_create_collection(name="documents")
+        from pipelines.ingestion_pipeline import get_chroma_collection
+        collection = get_chroma_collection()
         collection.delete(where={"document_id": document_id})
     except Exception as e:
         logger.warning(f"Failed to clean ChromaDB for doc {document_id}: {e}")
