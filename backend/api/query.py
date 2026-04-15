@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from fastapi import APIRouter, Depends
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -8,7 +9,7 @@ from core.database import get_db
 from core.security import get_current_user
 from models.user import User
 from models.query import QueryRecord
-from pipelines.query_pipeline import run_query
+from pipelines.query_pipeline import run_query, run_query_stream
 
 router = APIRouter(prefix="/api/query", tags=["query"])
 
@@ -46,6 +47,23 @@ def query_documents(
 ):
     result = run_query(db, current_user.id, request.question, request.document_ids)
     return result
+
+
+@router.post("/stream")
+def query_documents_stream(
+    request: QueryRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    return StreamingResponse(
+        run_query_stream(db, current_user.id, request.question, request.document_ids),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
 
 
 @router.get("/history", response_model=QueryHistoryResponse)

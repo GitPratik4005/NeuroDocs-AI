@@ -39,6 +39,10 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  --color-gold: var(--gold);
+  --color-gold-soft: var(--gold-soft);
+  --color-purple-cta: var(--purple-cta);
+  --color-purple-soft: var(--purple-soft);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -48,73 +52,127 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/* Light theme — clean white with gold accent + purple CTA */
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  --background: oklch(0.985 0.005 95);
+  --foreground: oklch(0.18 0.02 260);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  --card-foreground: oklch(0.18 0.02 260);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.18 0.02 260);
+  /* Gold primary */
+  --primary: oklch(0.78 0.16 80);
+  --primary-foreground: oklch(0.18 0.02 260);
+  --secondary: oklch(0.95 0.02 80);
+  --secondary-foreground: oklch(0.3 0.08 80);
+  --muted: oklch(0.96 0.005 260);
+  --muted-foreground: oklch(0.45 0.02 260);
+  --accent: oklch(0.95 0.04 295);
+  --accent-foreground: oklch(0.3 0.15 295);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --border: oklch(0.9 0.01 260);
+  --input: oklch(0.9 0.01 260);
+  --ring: oklch(0.65 0.2 295);
+  --chart-1: oklch(0.78 0.16 80);
+  --chart-2: oklch(0.65 0.2 295);
+  --chart-3: oklch(0.7 0.18 340);
+  --chart-4: oklch(0.7 0.15 240);
+  --chart-5: oklch(0.85 0.1 80);
+  --radius: 0.9rem;
+  --sidebar: oklch(0.97 0.005 260);
+  --sidebar-foreground: oklch(0.18 0.02 260);
+  --sidebar-primary: oklch(0.78 0.16 80);
+  --sidebar-primary-foreground: oklch(0.18 0.02 260);
+  --sidebar-accent: oklch(0.95 0.04 295);
+  --sidebar-accent-foreground: oklch(0.3 0.15 295);
+  --sidebar-border: oklch(0.9 0.01 260);
+  --sidebar-ring: oklch(0.65 0.2 295);
+
+  /* Brand tokens */
+  --gold: oklch(0.78 0.16 80);
+  --gold-soft: oklch(0.85 0.12 80);
+  --purple-cta: oklch(0.65 0.2 295);
+  --purple-soft: oklch(0.72 0.15 295);
+
+  /* Aurora stops — vivid in light mode so they don't wash out */
+  --aurora-1: oklch(0.58 0.24 295);   /* purple */
+  --aurora-2: oklch(0.68 0.2 75);     /* gold */
+  --aurora-3: oklch(0.65 0.23 340);   /* pink */
+  --aurora-4: oklch(0.62 0.2 240);    /* blue */
+
+  /* Gold gradient stops (richer for light bg) */
+  --gold-a: oklch(0.62 0.19 70);
+  --gold-b: oklch(0.55 0.2 60);
+  --gold-c: oklch(0.7 0.17 85);
+
+  /* Glass tokens */
+  --glass-bg: rgba(255, 255, 255, 0.55);
+  --glass-border: rgba(15, 23, 42, 0.1);
+  --glass-shadow: 0 12px 40px -12px rgba(15, 23, 42, 0.18);
+
+  /* Aurora overlay fade (how much to dim) */
+  --aurora-veil: rgba(255, 255, 255, 0.2);
 }
 
+/* Dark theme — deep slate base with gold + purple glow */
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
+  --background: oklch(0.18 0.025 260);
+  --foreground: oklch(0.97 0.01 95);
+  --card: oklch(0.22 0.03 260);
+  --card-foreground: oklch(0.97 0.01 95);
+  --popover: oklch(0.22 0.03 260);
+  --popover-foreground: oklch(0.97 0.01 95);
+  /* Gold primary */
+  --primary: oklch(0.82 0.17 80);
+  --primary-foreground: oklch(0.18 0.025 260);
+  --secondary: oklch(0.26 0.04 260);
+  --secondary-foreground: oklch(0.95 0.01 95);
+  --muted: oklch(0.26 0.03 260);
+  --muted-foreground: oklch(0.72 0.02 260);
+  --accent: oklch(0.3 0.08 295);
+  --accent-foreground: oklch(0.97 0.01 95);
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --border: oklch(0.32 0.04 260);
+  --input: oklch(0.28 0.03 260);
+  --ring: oklch(0.7 0.2 295);
+  --chart-1: oklch(0.82 0.17 80);
+  --chart-2: oklch(0.7 0.2 295);
+  --chart-3: oklch(0.72 0.18 340);
+  --chart-4: oklch(0.7 0.15 240);
+  --chart-5: oklch(0.6 0.1 80);
+  --sidebar: oklch(0.2 0.025 260);
+  --sidebar-foreground: oklch(0.97 0.01 95);
+  --sidebar-primary: oklch(0.82 0.17 80);
+  --sidebar-primary-foreground: oklch(0.18 0.025 260);
+  --sidebar-accent: oklch(0.3 0.08 295);
+  --sidebar-accent-foreground: oklch(0.97 0.01 95);
+  --sidebar-border: oklch(0.32 0.04 260);
+  --sidebar-ring: oklch(0.7 0.2 295);
+
+  /* Brand tokens */
+  --gold: oklch(0.82 0.17 80);
+  --gold-soft: oklch(0.72 0.14 80);
+  --purple-cta: oklch(0.7 0.2 295);
+  --purple-soft: oklch(0.6 0.17 295);
+
+  /* Aurora stops */
+  --aurora-1: oklch(0.7 0.22 295);
+  --aurora-2: oklch(0.84 0.19 80);
+  --aurora-3: oklch(0.74 0.2 340);
+  --aurora-4: oklch(0.72 0.18 240);
+
+  /* Gold gradient stops (brighter for dark bg) */
+  --gold-a: oklch(0.88 0.16 90);
+  --gold-b: oklch(0.82 0.18 80);
+  --gold-c: oklch(0.9 0.13 85);
+
+  /* Glass tokens */
+  --glass-bg: rgba(255, 255, 255, 0.06);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.6);
+
+  /* Aurora overlay fade */
+  --aurora-veil: rgba(10, 14, 25, 0.45);
 }
 
 @layer base {
@@ -127,4 +185,101 @@
   html {
     @apply font-sans;
   }
+}
+
+/* =========================================================================
+   Aurora Glass utilities
+   ========================================================================= */
+
+@utility glass-card {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  box-shadow: var(--glass-shadow);
+}
+
+@utility glass-panel {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(22px) saturate(150%);
+  -webkit-backdrop-filter: blur(22px) saturate(150%);
+}
+
+@utility aurora-bg {
+  background:
+    radial-gradient(at 20% 20%, var(--aurora-1) 0px, transparent 55%),
+    radial-gradient(at 80% 15%, var(--aurora-2) 0px, transparent 55%),
+    radial-gradient(at 30% 85%, var(--aurora-3) 0px, transparent 55%),
+    radial-gradient(at 85% 80%, var(--aurora-4) 0px, transparent 55%);
+  filter: blur(40px) saturate(160%);
+  animation: aurora-drift 18s ease-in-out infinite alternate;
+}
+
+@utility aurora-veil {
+  background: var(--aurora-veil);
+}
+
+@utility gold-text {
+  background: linear-gradient(
+    120deg,
+    var(--gold-a) 0%,
+    var(--gold-b) 45%,
+    var(--gold-c) 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: gold-shimmer 6s ease-in-out infinite;
+}
+
+@keyframes aurora-drift {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(-4%, 3%, 0) scale(1.08);
+  }
+  100% {
+    transform: translate3d(3%, -2%, 0) scale(1.05);
+  }
+}
+
+@keyframes gold-shimmer {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes pulse-orb {
+  0%, 100% { opacity: 0.9; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.15); }
+}
+
+/* Respect user motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .aurora-bg {
+    animation: none !important;
+  }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Custom scrollbar — subtle gold accent on dark */
+.dark ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+.dark ::-webkit-scrollbar-track {
+  background: transparent;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: oklch(0.32 0.04 260);
+  border-radius: 999px;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.5 0.1 295);
 }

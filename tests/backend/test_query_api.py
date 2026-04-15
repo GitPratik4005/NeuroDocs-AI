@@ -4,7 +4,7 @@ from unittest.mock import patch, MagicMock
 
 
 @patch("pipelines.query_pipeline.generate_answer", return_value="Mocked answer about the document.")
-@patch("pipelines.query_pipeline.retrieve_relevant_chunks")
+@patch("pipelines.query_pipeline.hybrid_retrieve")
 def test_query_success(mock_retrieve, mock_answer, client, auth_headers):
     mock_retrieve.return_value = {
         "documents": [["chunk 1 content", "chunk 2 content"]],
@@ -23,7 +23,7 @@ def test_query_success(mock_retrieve, mock_answer, client, auth_headers):
     assert "doc1" in data["document_ids"]
 
 
-@patch("pipelines.query_pipeline.retrieve_relevant_chunks")
+@patch("pipelines.query_pipeline.hybrid_retrieve")
 def test_query_no_results(mock_retrieve, client, auth_headers):
     mock_retrieve.return_value = {
         "documents": [[]],
@@ -45,7 +45,7 @@ def test_query_no_auth(client):
 
 
 @patch("pipelines.query_pipeline.generate_answer", return_value="Answer 1")
-@patch("pipelines.query_pipeline.retrieve_relevant_chunks")
+@patch("pipelines.query_pipeline.hybrid_retrieve")
 def test_query_history(mock_retrieve, mock_answer, client, auth_headers):
     mock_retrieve.return_value = {
         "documents": [["some content"]],

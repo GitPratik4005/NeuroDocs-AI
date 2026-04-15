@@ -40,6 +40,8 @@ test.db
 uploads/
 backend/uploads/
 backend/chroma_data/
+chroma_data/
+tests/backend/chroma_data/
 
 # Claude Code local settings
 .claude/settings.local.json

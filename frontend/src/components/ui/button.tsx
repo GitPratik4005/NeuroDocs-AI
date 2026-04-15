@@ -18,6 +18,12 @@ const buttonVariants = cva(
         destructive:
           "bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40",
         link: "text-primary underline-offset-4 hover:underline",
+        gold:
+          "bg-[color:var(--gold)] text-[color:var(--primary-foreground)] shadow-[0_8px_24px_-8px_oklch(0.78_0.16_80/0.55)] hover:bg-[color:var(--gold-soft)] hover:shadow-[0_10px_30px_-6px_oklch(0.78_0.16_80/0.7)]",
+        purple:
+          "bg-[color:var(--purple-cta)] text-white shadow-[0_8px_24px_-8px_oklch(0.65_0.2_295/0.55)] hover:bg-[color:var(--purple-soft)] hover:shadow-[0_10px_32px_-6px_oklch(0.65_0.2_295/0.7)]",
+        glass:
+          "glass-card hover:bg-white/15 dark:hover:bg-white/10",
       },
       size: {
         default:

@@ -9,9 +9,11 @@ import models.user  # noqa: F401 — register User model for table creation
 import models.document  # noqa: F401
 import models.chunk  # noqa: F401
 import models.query  # noqa: F401
+import models.conversation  # noqa: F401 — register Conversation models
 from api.auth import router as auth_router
 from api.upload import router as upload_router
 from api.query import router as query_router
+from api.conversations import router as conversations_router
 
 
 @asynccontextmanager
@@ -34,6 +36,7 @@ app.add_middleware(
 app.include_router(auth_router)
 app.include_router(upload_router)
 app.include_router(query_router)
+app.include_router(conversations_router)
 
 
 @app.get("/")

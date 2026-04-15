@@ -29,16 +29,13 @@
 
 NeuroDocAI allows users to:
 
-- Upload documents (PDF, DOCX)
-- Extract and process content (including OCR for images)
-- Convert documents into searchable knowledge
-- Ask questions using natural language (RAG-based)
-- Get answers with citations
-- Generate:
-  - summaries
-  - key insights
-  - simplified explanations
-  - action suggestions
+- Upload documents (PDF, DOCX, CSV, XLSX)
+- Extract and process content (including OCR for scanned/image-based PDFs)
+- Convert documents into searchable knowledge (hybrid vector + keyword index)
+- Ask questions using natural language (RAG-based, streaming responses)
+- Get answers with cited passages
+- Resume persistent conversations per document
+- Future (V2): generate summaries, key insights, simplified explanations, action suggestions
 
 ---
 
@@ -46,52 +43,46 @@ NeuroDocAI allows users to:
 
 ---
 
-### 🟢 MVP (Minimum Viable Product)
+### 🟢 MVP — ✅ Shipped
 
-- User authentication (JWT)
+- User authentication (JWT + bcrypt)
 - Upload PDF/DOCX
-- Basic text extraction
-- Basic ingestion pipeline:
-  - chunking
-  - embedding
-- Basic RAG:
-  - semantic search
-  - Q&A
-- Simple chat interface
+- Basic text extraction (PyMuPDF, python-docx)
+- Basic ingestion pipeline: chunking + Ollama embedding + ChromaDB storage
+- Basic RAG: semantic retrieval + Ollama Q&A
+- Next.js frontend: login, register, dashboard, chat
+- Streaming responses (SSE)
+- Backend + frontend test suites
 
 ---
 
-### 🟡 V1 (Enhanced System)
+### 🟡 V1 (Enhanced System) — ✅ Shipped
 
 - CSV and XLSX file support (tabular data extraction and chunking)
-- OCR support for image-based documents
-- Smart chunking (semantic + overlapping)
-- Hybrid search:
-  - vector + keyword
-- Reranking of results
-- Citations in answers
-- Auto document summaries
+- OCR support for scanned/image-based PDFs (PyMuPDF + Tesseract fallback)
+- Smart chunking (heading/paragraph-aware, sentence-boundary splits)
+- Hybrid search: vector (ChromaDB) + BM25 keyword search fused via Reciprocal Rank Fusion
+- LLM-based reranking (Ollama ranks candidates before answer generation)
+- Persistent conversations per document (create/resume/delete from sidebar)
+- "Aurora Glass" UI/UX redesign: animated aurora backgrounds, glassmorphic cards, Gold + Purple Tech palette, Framer Motion animations, DM Sans, public landing + About pages
 
 ---
 
-### 🔵 V2 (Advanced AI System)
+### 🔵 V2 (Advanced AI System) — 🔜 Planned
 
+- Auto-generated document summaries on upload
+- Key insights extraction (key points, risks, action suggestions, simplified explanations)
+- Query history page
 - Multi-agent architecture:
   - ingestion agent
-  - retrieval agent
+  - retriever agent
   - QA agent
   - summarizer agent
   - insight agent
   - memory agent
-
-- Insight generation:
-  - key points
-  - risks
-  - action suggestions
-  - simplified explanations
-
-- Memory system (context-aware queries)
-- Enhanced dashboard UI
+- Memory system (context-aware queries across conversations)
+- PostgreSQL `tsvector` for persistent keyword search (replace in-memory BM25)
+- Citations tied to source passages in answers
 
 ---
 
@@ -112,30 +103,40 @@ NeuroDocAI allows users to:
 ## 🧱 a. Tech Stack
 
 ### Frontend
-- Next.js (React)
-- Tailwind CSS
-- shadcn/ui
+- Next.js 16 (App Router, Turbopack)
+- React 19 + TypeScript
+- Tailwind CSS v4 (custom `@utility` blocks for Aurora Glass)
+- shadcn/ui + Base UI primitives
+- Framer Motion (animations, 3D tilt, scroll reveals)
+- next-themes (dark/light/system toggle)
+- DM Sans (body) + Geist Mono (code)
 
 ### Backend
-- FastAPI (Python)
+- FastAPI (Python 3.14)
+- Pydantic v2 for schemas/settings
 
 ### Databases
-- PostgreSQL → structured data (users, documents, queries)
-- ChromaDB → vector embeddings
+- PostgreSQL 18.3 → structured data (users, documents, chunks, queries, conversations, messages)
+- ChromaDB 1.5.5 (embedded) → vector embeddings
 
 ### AI / LLM
-- Hybrid:
-  - Local (Ollama)
-  - API fallback (OpenAI or similar)
+- **Ollama only (local)** — no cloud/API fallback
+- Default LLM: `qwen2:0.5b`; alternatives: `llama3`, `phi3`
+- Embeddings: `nomic-embed-text`
+- LLM reranking before answer generation
+
+### Retrieval
+- Hybrid: vector (ChromaDB) + BM25 (`rank_bm25`, in-memory) → RRF fusion (k=60) → LLM rerank
 
 ### OCR
-- Tesseract (primary)
-- Optional cloud fallback
+- PyMuPDF (primary pixmap rendering)
+- Tesseract via `pytesseract` (fallback for scanned PDFs, <50 chars/page)
+- No cloud OCR fallback
 
 ### Other
-- SQLAlchemy (ORM)
-- Alembic (migrations)
+- SQLAlchemy (ORM, no Alembic migrations for now)
 - Docker (deployment)
+- Tests: pytest (backend) + Jest + React Testing Library (frontend)
 
 ---
 
@@ -148,32 +149,31 @@ NeuroDocAI allows users to:
 #### 📥 Document Ingestion
 
 ```text
-Upload
+Upload (PDF / DOCX / CSV / XLSX)
 → File type detection
-→ OCR (if needed)
 → Text extraction
-→ Cleaning
-→ Smart chunking
-→ Metadata extraction
-→ Embedding generation
+   - PDF: PyMuPDF, with Tesseract OCR fallback on scanned pages
+   - DOCX: python-docx
+   - CSV / XLSX: pipe-separated row text, sheet headers for XLSX
+→ Smart chunking (heading/paragraph-aware for PDF/DOCX; naive 500/50 for CSV/XLSX)
+→ Ollama embedding (nomic-embed-text)
 → Storage:
-   - PostgreSQL (metadata)
-   - ChromaDB (vectors)
+   - PostgreSQL (User, Document, Chunk, Conversation, ConversationMessage)
+   - ChromaDB (vectors, keyed by chunk id)
 ```
 
 #### 🔍 Query Processing
 
 ```text
-User Query
-→ Query processing / rewriting
-→ Hybrid retrieval:
+User Query (optionally scoped to a doc_id)
+→ Hybrid retrieval (4× candidate pool):
    - vector search (ChromaDB)
-   - keyword search (PostgreSQL)
-→ Reranking
-→ Context selection
-→ LLM response generation
-→ Add citations
-→ Store query in memory
+   - BM25 keyword search (rank_bm25, in-memory)
+   → Reciprocal Rank Fusion (k=60)
+→ LLM rerank (Ollama ranks top candidates by relevance)
+→ Context assembly
+→ Ollama LLM answer generation (streamed via SSE)
+→ Persist to Conversation + ConversationMessage
 ```
 
 ---
@@ -187,32 +187,31 @@ NeuroDocs-AI/
   │   │   ├── __init__.py
   │   │   ├── auth.py
   │   │   ├── upload.py
-  │   │   ├── query.py
-  │   │   └── insights.py
+  │   │   ├── query.py             # /query, /query/stream (SSE), /query/history
+  │   │   └── conversations.py     # GET/POST/DELETE conversations + messages
   │   ├── services/
   │   │   ├── __init__.py
   │   │   ├── auth_service.py
-  │   │   ├── ocr_service.py
-  │   │   ├── embedding_service.py
+  │   │   ├── ocr_service.py       # PyMuPDF + Tesseract fallback
+  │   │   ├── csv_extractor.py     # CSV/XLSX → pipe-separated text
+  │   │   ├── chunking_service.py  # smart (heading-aware) + naive
+  │   │   ├── embedding_service.py # Ollama nomic-embed-text
+  │   │   ├── keyword_search.py    # BM25Okapi in-memory index
+  │   │   ├── reranker.py          # Ollama LLM reranking
   │   │   └── rag_service.py
-  │   ├── agents/
-  │   │   ├── __init__.py
-  │   │   ├── ingestion_agent.py
-  │   │   ├── retriever_agent.py
-  │   │   ├── qa_agent.py
-  │   │   ├── summarizer_agent.py
-  │   │   ├── insight_agent.py
-  │   │   └── memory_agent.py
+  │   ├── agents/                  # V2 scope (empty for now)
   │   ├── pipelines/
   │   │   ├── __init__.py
   │   │   ├── ingestion_pipeline.py
-  │   │   └── query_pipeline.py
+  │   │   └── query_pipeline.py    # hybrid retrieve → rerank → generate
   │   ├── models/
   │   │   ├── __init__.py
   │   │   ├── user.py
   │   │   ├── document.py
   │   │   ├── chunk.py
-  │   │   └── query.py
+  │   │   ├── query.py
+  │   │   ├── conversation.py
+  │   │   └── conversation_message.py
   │   ├── core/
   │   │   ├── __init__.py
   │   │   ├── config.py
@@ -223,26 +222,38 @@ NeuroDocs-AI/
   │   └── requirements.txt
   │
   ├── frontend/
-  │   ├── app/
-  │   │   ├── page.tsx
-  │   │   ├── layout.tsx
-  │   │   ├── login/
-  │   │   │   └── page.tsx
-  │   │   ├── dashboard/
-  │   │   │   └── page.tsx
-  │   │   ├── upload/
-  │   │   │   └── page.tsx
-  │   │   └── chat/
-  │   │       └── page.tsx
-  │   ├── components/
-  │   │   ├── Navbar.tsx
-  │   │   ├── DocumentList.tsx
-  │   │   ├── ChatWindow.tsx
-  │   │   └── InsightsPanel.tsx
-  │   ├── lib/
-  │   │   └── (shared utilities, auth helpers, formatters)
-  │   ├── services/
-  │   │   └── api.ts
+  │   ├── src/
+  │   │   ├── app/
+  │   │   │   ├── layout.tsx            # DM Sans, ThemeProvider, AuthProvider
+  │   │   │   ├── page.tsx              # Public landing (Aurora Glass)
+  │   │   │   ├── globals.css           # Tailwind v4 + @utility glass/aurora/gold-text
+  │   │   │   ├── about/page.tsx        # Public About page
+  │   │   │   ├── (auth)/
+  │   │   │   │   ├── login/page.tsx
+  │   │   │   │   └── register/page.tsx
+  │   │   │   └── (app)/
+  │   │   │       ├── layout.tsx        # AuroraBackground + NavBar
+  │   │   │       ├── dashboard/page.tsx
+  │   │   │       └── chat/page.tsx
+  │   │   ├── components/
+  │   │   │   ├── ui/                   # shadcn + Base UI (button, card, input, ...)
+  │   │   │   │   └── glass-card.tsx    # glass + optional 3D tilt
+  │   │   │   ├── motion/
+  │   │   │   │   ├── fade-in.tsx
+  │   │   │   │   └── stagger-list.tsx
+  │   │   │   ├── auth-guard.tsx
+  │   │   │   ├── aurora-background.tsx
+  │   │   │   ├── drag-drop-upload.tsx
+  │   │   │   ├── nav-bar.tsx           # floating glass pill
+  │   │   │   ├── theme-provider.tsx
+  │   │   │   └── theme-toggle.tsx
+  │   │   ├── context/auth-context.tsx  # JWT state
+  │   │   ├── lib/
+  │   │   │   ├── utils.ts              # cn()
+  │   │   │   └── motion.ts             # shared Framer Motion variants
+  │   │   ├── services/api.ts
+  │   │   ├── types/index.ts
+  │   │   └── __tests__/                # Jest + RTL
   │   ├── package.json
   │   └── tsconfig.json
   │

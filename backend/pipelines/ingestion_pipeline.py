@@ -10,59 +10,12 @@ from models.chunk import Chunk
 from models.document import Document
 from services.ocr_service import extract_text
 from services.embedding_service import generate_embeddings
+from services.chunking_service import smart_chunk, chunk_text
 
-CHUNK_SIZE = 500
-CHUNK_OVERLAP = 50
-
-
-def chunk_text(text: str, chunk_size: int = CHUNK_SIZE, overlap: int = CHUNK_OVERLAP) -> list[str]:
-    """Split text into chunks with overlap, respecting sentence boundaries."""
-    if not text.strip():
-        return []
-
-    chunks = []
-    start = 0
-    text_len = len(text)
-    min_chunk_size = 100  # avoid tiny chunks
-
-    while start < text_len:
-        end = min(start + chunk_size, text_len)
-
-        if end < text_len:
-            # Try to break at sentence-ending period (followed by space or newline)
-            boundary = -1
-            search_end = end
-            while search_end > start + min_chunk_size:
-                pos = text.rfind(".", start + min_chunk_size, search_end)
-                if pos == -1:
-                    break
-                # Check if it's a real sentence boundary (followed by space, newline, or end)
-                next_char_pos = pos + 1
-                if next_char_pos >= text_len or text[next_char_pos] in (" ", "\n", "\r"):
-                    boundary = pos
-                    break
-                search_end = pos
-
-            if boundary == -1:
-                # Fall back to newline break
-                boundary = text.rfind("\n", start + min_chunk_size, end)
-            if boundary == -1:
-                # Fall back to space break
-                boundary = text.rfind(" ", start + min_chunk_size, end)
-            if boundary > start + min_chunk_size:
-                end = boundary + 1
-
-        chunk = text[start:end].strip()
-        if chunk:
-            chunks.append(chunk)
-
-        # Ensure start always moves forward
-        next_start = end - overlap if end < text_len else text_len
-        if next_start <= start:
-            next_start = start + 1
-        start = next_start
-
-    return chunks
+# File types that benefit from structure-aware chunking
+STRUCTURED_FILE_TYPES = {"pdf", "docx"}
+# File types that work better with naive chunking (row-based content)
+FLAT_FILE_TYPES = {"csv", "xlsx"}
 
 
 def get_chroma_collection():
@@ -85,8 +38,11 @@ def run_ingestion(db: Session, document_id: str) -> None:
             db.commit()
             return
 
-        # Step 2: Chunk text
-        chunks = chunk_text(text)
+        # Step 2: Chunk text (smart for structured docs, naive for flat files)
+        if doc.file_type in STRUCTURED_FILE_TYPES:
+            chunks = smart_chunk(text)
+        else:
+            chunks = chunk_text(text)
         if not chunks:
             doc.status = "failed"
             db.commit()
