@@ -45,7 +45,9 @@ Every task MUST follow:
 
 Follow strict phases: **MVP → V1 → V2 → Future**
 
-DO NOT skip phases. Current milestone: **V1** (complete)
+Project status: **Concluded at V1** (merged to `main` 2026-04-15, PR #2).
+V2 items are archived as **possible future improvements** in `docs/STATUS.md`
+and `docs/PROJECT_SPEC.md` — no active development planned.
 
 ---
 

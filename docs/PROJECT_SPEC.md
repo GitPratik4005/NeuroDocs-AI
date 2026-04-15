@@ -68,18 +68,16 @@ NeuroDocAI allows users to:
 
 ---
 
-### 🔵 V2 (Advanced AI System) — 🔜 Planned
+### 🔵 V2 — 📦 Archived as Possible Future Improvements
+
+The project concluded at V1. The items below are retained for reference only
+and are **not** an active phase. Anyone picking this up later can treat them
+as a backlog.
 
 - Auto-generated document summaries on upload
 - Key insights extraction (key points, risks, action suggestions, simplified explanations)
 - Query history page
-- Multi-agent architecture:
-  - ingestion agent
-  - retriever agent
-  - QA agent
-  - summarizer agent
-  - insight agent
-  - memory agent
+- Multi-agent architecture: ingestion / retriever / QA / summarizer / insight / memory agents
 - Memory system (context-aware queries across conversations)
 - PostgreSQL `tsvector` for persistent keyword search (replace in-memory BM25)
 - Citations tied to source passages in answers
