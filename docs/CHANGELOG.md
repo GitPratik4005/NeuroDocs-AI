@@ -7,7 +7,11 @@ Format:
 - Each entry includes a timestamp
 ---
 
-## [Unreleased]
+## [1.0.0] — 2026-04-15 — V1 Shipped & Project Concluded
+
+PR #2 merged to `main`. Project officially concluded at V1.
+V2 items (summaries, insights, multi-agent, memory, tsvector, citations)
+retained as **possible future improvements** in STATUS.md / PROJECT_SPEC.md.
 
 ### Added (V1 UI/UX — "Aurora Glass" redesign)
 - **Aurora Glass design system**: animated mesh-gradient backgrounds + glassmorphic cards

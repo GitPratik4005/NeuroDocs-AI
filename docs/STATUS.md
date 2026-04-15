@@ -3,7 +3,10 @@
 ---
 
 ## Current Phase
-V1
+**V1 — Shipped & Concluded** (merged to `main` on 2026-04-15, PR #2)
+
+The project is complete for its stated scope. V2 items below are kept as
+**possible future improvements**, not an active phase.
 
 ---
 
@@ -87,12 +90,16 @@ V1
 
 ---
 
-## V2 Scope (Next Phase)
+## Possible Future Improvements (previously "V2 scope")
+Kept here for reference only — no active work planned.
+
 1. Auto-generated document summaries on upload
-2. Key insights extraction
+2. Key insights extraction (key points, risks, action suggestions, simplified explanations)
 3. Query history page
-4. Multi-agent system (Ingestion, Retriever, QA, Summarizer agents)
+4. Multi-agent system (Ingestion, Retriever, QA, Summarizer, Insight, Memory agents)
 5. PostgreSQL tsvector for persistent keyword search (replace in-memory BM25)
+6. Memory system for context-aware queries across conversations
+7. Citations tied to source passages in answers
 
 ---
 
