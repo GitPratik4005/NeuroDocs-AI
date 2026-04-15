@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { listDocuments, deleteDocument } from "@/services/api";
 import type { DocumentResponse } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -17,7 +18,10 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { DragDropUpload } from "@/components/drag-drop-upload";
-import { MessageSquare, Trash2, RefreshCw } from "lucide-react";
+import { GlassCard } from "@/components/ui/glass-card";
+import { StaggerList, StaggerItem } from "@/components/motion/stagger-list";
+import { MessageSquare, Trash2, RefreshCw, Sparkles } from "lucide-react";
+import { easeOut } from "@/lib/motion";
 
 const statusVariant: Record<string, "default" | "secondary" | "destructive"> = {
   ready: "default",
@@ -74,20 +78,29 @@ export default function DashboardPage() {
   return (
     <div className="space-y-12">
       {/* Hero + Upload Section */}
-      <section className="text-center space-y-6 pt-8">
+      <motion.section
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: easeOut }}
+        className="space-y-6 pt-8 text-center"
+      >
         <div className="space-y-3">
-          <h1 className="text-4xl font-bold tracking-tight">
-            AI Document Intelligence
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/15 glass-panel px-3 py-1 text-xs font-medium text-muted-foreground">
+            <Sparkles className="h-3.5 w-3.5 text-[color:var(--gold)]" />
+            Your private knowledge base
+          </div>
+          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
+            <span className="gold-text">AI Document Intelligence</span>
           </h1>
-          <p className="text-lg text-muted-foreground max-w-xl mx-auto">
-            Upload your documents and chat with them instantly.
-            Get summaries, key points, and answers in seconds.
+          <p className="mx-auto max-w-xl text-lg text-muted-foreground">
+            Upload documents and chat with them instantly. Get summaries, key
+            points, and cited answers in seconds.
           </p>
         </div>
-        <div className="max-w-xl mx-auto">
+        <div className="mx-auto max-w-xl">
           <DragDropUpload onUploadComplete={handleUploadComplete} />
         </div>
-      </section>
+      </motion.section>
 
       {/* Documents Section */}
       <section className="space-y-4">
@@ -108,7 +121,10 @@ export default function DashboardPage() {
         {loading ? (
           <div className="space-y-3">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="flex items-center gap-4 rounded-lg border p-4">
+              <div
+                key={i}
+                className="flex items-center gap-4 rounded-xl border border-white/10 glass-panel p-4"
+              >
                 <Skeleton className="h-5 w-48" />
                 <Skeleton className="h-5 w-16" />
                 <Skeleton className="h-5 w-20" />
@@ -120,78 +136,132 @@ export default function DashboardPage() {
             ))}
           </div>
         ) : documents.length === 0 ? (
-          <div className="rounded-xl border border-dashed p-12 text-center">
+          <GlassCard className="p-12 text-center">
             <p className="text-muted-foreground">
               No documents yet. Upload one above to get started.
             </p>
-          </div>
+          </GlassCard>
         ) : (
           <>
-            <div className="overflow-x-auto rounded-xl border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Title</TableHead>
-                    <TableHead className="hidden sm:table-cell">Type</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="hidden sm:table-cell">Chunks</TableHead>
-                    <TableHead className="hidden md:table-cell">Uploaded</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {documents.map((doc) => (
-                    <TableRow key={doc.id} className="group">
-                      <TableCell className="font-medium">{doc.title}</TableCell>
-                      <TableCell className="hidden sm:table-cell uppercase text-xs tracking-wider text-muted-foreground">
-                        {doc.file_type}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={statusVariant[doc.status] ?? "secondary"}>
-                          {doc.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="hidden sm:table-cell text-muted-foreground">
-                        {doc.chunk_count}
-                      </TableCell>
-                      <TableCell className="hidden md:table-cell text-muted-foreground">
-                        {new Date(doc.uploaded_at).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-1">
-                          {doc.status === "ready" && (
-                            <Link href={`/chat?doc=${doc.id}`}>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="cursor-pointer gap-1.5 text-primary hover:text-primary hover:bg-primary/10"
-                              >
-                                <MessageSquare className="h-4 w-4" />
-                                <span className="hidden sm:inline">Chat</span>
-                              </Button>
-                            </Link>
-                          )}
+            <StaggerList className="hidden space-y-0 md:block">
+              <GlassCard className="overflow-hidden p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="border-white/10">
+                      <TableHead>Title</TableHead>
+                      <TableHead className="hidden sm:table-cell">Type</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="hidden sm:table-cell">Chunks</TableHead>
+                      <TableHead className="hidden md:table-cell">Uploaded</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {documents.map((doc) => (
+                      <TableRow key={doc.id} className="group border-white/5 hover:bg-white/5">
+                        <TableCell className="font-medium">{doc.title}</TableCell>
+                        <TableCell className="hidden text-xs uppercase tracking-wider text-muted-foreground sm:table-cell">
+                          {doc.file_type}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={statusVariant[doc.status] ?? "secondary"}>
+                            {doc.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="hidden text-muted-foreground sm:table-cell">
+                          {doc.chunk_count}
+                        </TableCell>
+                        <TableCell className="hidden text-muted-foreground md:table-cell">
+                          {new Date(doc.uploaded_at).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-1">
+                            {doc.status === "ready" && (
+                              <Link href={`/chat?doc=${doc.id}`}>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="cursor-pointer gap-1.5 text-[color:var(--purple-cta)] hover:bg-[color:var(--purple-cta)]/10 hover:text-[color:var(--purple-cta)]"
+                                >
+                                  <MessageSquare className="h-4 w-4" />
+                                  <span className="hidden sm:inline">Chat</span>
+                                </Button>
+                              </Link>
+                            )}
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 cursor-pointer text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                              onClick={() => handleDelete(doc.id, doc.title)}
+                              disabled={deleting === doc.id}
+                              aria-label={`Delete ${doc.title}`}
+                            >
+                              {deleting === doc.id ? (
+                                <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                              ) : (
+                                <Trash2 className="h-4 w-4" />
+                              )}
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </GlassCard>
+            </StaggerList>
+
+            {/* Mobile card list */}
+            <StaggerList className="grid gap-3 md:hidden">
+              {documents.map((doc) => (
+                <StaggerItem key={doc.id}>
+                  <GlassCard className="p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-medium">{doc.title}</p>
+                        <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
+                          <span className="uppercase tracking-wider">
+                            {doc.file_type}
+                          </span>
+                          <span>·</span>
+                          <span>{doc.chunk_count} chunks</span>
+                        </div>
+                      </div>
+                      <Badge variant={statusVariant[doc.status] ?? "secondary"}>
+                        {doc.status}
+                      </Badge>
+                    </div>
+                    <div className="mt-3 flex items-center justify-end gap-1">
+                      {doc.status === "ready" && (
+                        <Link href={`/chat?doc=${doc.id}`}>
                           <Button
                             variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 cursor-pointer text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                            onClick={() => handleDelete(doc.id, doc.title)}
-                            disabled={deleting === doc.id}
-                            aria-label={`Delete ${doc.title}`}
+                            size="sm"
+                            className="cursor-pointer gap-1.5 text-[color:var(--purple-cta)]"
                           >
-                            {deleting === doc.id ? (
-                              <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                            ) : (
-                              <Trash2 className="h-4 w-4" />
-                            )}
+                            <MessageSquare className="h-4 w-4" /> Chat
                           </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+                        </Link>
+                      )}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 cursor-pointer text-muted-foreground hover:text-destructive"
+                        onClick={() => handleDelete(doc.id, doc.title)}
+                        disabled={deleting === doc.id}
+                        aria-label={`Delete ${doc.title}`}
+                      >
+                        {deleting === doc.id ? (
+                          <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                        ) : (
+                          <Trash2 className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                  </GlassCard>
+                </StaggerItem>
+              ))}
+            </StaggerList>
 
             {totalPages > 1 && (
               <div className="flex justify-center gap-2 pt-2">
@@ -204,7 +274,7 @@ export default function DashboardPage() {
                 >
                   Previous
                 </Button>
-                <span className="flex items-center text-sm text-muted-foreground px-3">
+                <span className="flex items-center px-3 text-sm text-muted-foreground">
                   Page {page} of {totalPages}
                 </span>
                 <Button

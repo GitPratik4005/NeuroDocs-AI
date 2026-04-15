@@ -212,10 +212,10 @@ export default function ChatPage() {
   if (!docId) return null;
 
   return (
-    <div className="flex h-[calc(100vh-5rem)] gap-0 overflow-hidden rounded-xl border">
+    <div className="flex h-[calc(100vh-7rem)] gap-0 overflow-hidden rounded-2xl glass-panel border border-white/10">
       {/* Left Panel — Document Preview + Conversations */}
-      <aside className="hidden md:flex w-[280px] shrink-0 flex-col border-r bg-muted/30">
-        <div className="flex items-center gap-2 border-b p-4">
+      <aside className="hidden md:flex w-[280px] shrink-0 flex-col border-r border-white/10 bg-white/5 dark:bg-white/[0.02]">
+        <div className="flex items-center gap-2 border-b border-white/10 p-4">
           <Button
             variant="ghost"
             size="icon"
@@ -225,7 +225,7 @@ export default function ChatPage() {
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <span className="text-sm font-medium text-muted-foreground">Document</span>
+          <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Document</span>
         </div>
 
         {docLoading ? (
@@ -239,7 +239,7 @@ export default function ChatPage() {
           <div className="p-4 space-y-5 text-sm">
             <div className="space-y-1.5">
               <div className="flex items-start gap-2">
-                <FileText className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+                <FileText className="h-5 w-5 text-[color:var(--gold)] mt-0.5 shrink-0" />
                 <p className="font-medium leading-tight break-all">{doc.title}</p>
               </div>
             </div>
@@ -265,7 +265,7 @@ export default function ChatPage() {
         ) : null}
 
         {/* Conversation List */}
-        <div className="border-t flex-1 overflow-y-auto">
+        <div className="border-t border-white/10 flex-1 overflow-y-auto">
           <div className="flex items-center justify-between p-3">
             <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Chats</span>
             <Button
@@ -293,8 +293,8 @@ export default function ChatPage() {
                   key={conv.id}
                   className={`group flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors ${
                     activeConvId === conv.id
-                      ? "bg-primary/10 text-primary"
-                      : "hover:bg-accent"
+                      ? "bg-[color:var(--purple-cta)]/15 text-[color:var(--purple-cta)] ring-1 ring-[color:var(--purple-cta)]/25"
+                      : "hover:bg-white/5"
                   }`}
                   onClick={() => loadConversation(conv.id)}
                 >
@@ -323,7 +323,7 @@ export default function ChatPage() {
       {/* Right Panel — Chat */}
       <div className="flex flex-1 flex-col min-w-0">
         {/* Mobile back button */}
-        <div className="flex items-center gap-2 border-b p-3 md:hidden">
+        <div className="flex items-center gap-2 border-b border-white/10 p-3 md:hidden">
           <Button
             variant="ghost"
             size="icon"
@@ -337,34 +337,34 @@ export default function ChatPage() {
         </div>
 
         {/* Predefined Actions */}
-        <div className="flex items-center gap-2 border-b p-3 flex-wrap">
+        <div className="flex items-center gap-2 border-b border-white/10 p-3 flex-wrap">
           <Button
-            variant="outline"
+            variant="glass"
             size="sm"
-            className="cursor-pointer gap-1.5 transition-all hover:shadow-md hover:shadow-primary/10"
+            className="cursor-pointer gap-1.5"
             onClick={() => sendMessage("Summarize this document in 3 bullet points")}
             disabled={loading}
           >
-            <Sparkles className="h-3.5 w-3.5" />
+            <Sparkles className="h-3.5 w-3.5 text-[color:var(--gold)]" />
             Summarize
           </Button>
           <Button
-            variant="outline"
+            variant="glass"
             size="sm"
-            className="cursor-pointer gap-1.5 transition-all hover:shadow-md hover:shadow-primary/10"
+            className="cursor-pointer gap-1.5"
             onClick={() => sendMessage("List the key points from this document in 3 bullets")}
             disabled={loading}
           >
-            <ListChecks className="h-3.5 w-3.5" />
+            <ListChecks className="h-3.5 w-3.5 text-[color:var(--gold)]" />
             Key Points
           </Button>
 
           {/* Change Tone dropdown */}
           <div className="relative" ref={toneRef}>
             <Button
-              variant="outline"
+              variant="glass"
               size="sm"
-              className="cursor-pointer gap-1.5 transition-all hover:shadow-md hover:shadow-primary/10"
+              className="cursor-pointer gap-1.5"
               onClick={() => setToneOpen(!toneOpen)}
               disabled={loading}
             >
@@ -372,11 +372,11 @@ export default function ChatPage() {
               <ChevronDown className={`h-3.5 w-3.5 transition-transform ${toneOpen ? "rotate-180" : ""}`} />
             </Button>
             {toneOpen && (
-              <div className="absolute top-full left-0 z-10 mt-1 min-w-[180px] rounded-lg border bg-popover p-1 shadow-lg animate-in fade-in-0 zoom-in-95">
+              <div className="absolute top-full left-0 z-20 mt-1 min-w-[180px] rounded-lg glass-panel border border-white/15 p-1 shadow-xl animate-in fade-in-0 zoom-in-95">
                 {TONE_OPTIONS.map((opt) => (
                   <button
                     key={opt.label}
-                    className="w-full rounded-md px-3 py-2 text-left text-sm hover:bg-accent transition-colors cursor-pointer"
+                    className="w-full rounded-md px-3 py-2 text-left text-sm hover:bg-white/10 transition-colors cursor-pointer"
                     onClick={() => {
                       setToneOpen(false);
                       sendMessage(opt.prompt);
@@ -408,12 +408,17 @@ export default function ChatPage() {
               className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} animate-in fade-in-0 slide-in-from-bottom-2`}
             >
               <div
-                className={`max-w-[80%] rounded-xl px-4 py-3 ${
+                className={`max-w-[80%] rounded-2xl px-4 py-3 ${
                   msg.role === "user"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted"
+                    ? "bg-[color:var(--purple-cta)] text-white shadow-[0_8px_24px_-10px_oklch(0.65_0.2_295/0.6)] border border-[color:var(--gold)]/25"
+                    : "glass-card"
                 }`}
               >
+                {msg.role === "assistant" && (
+                  <div className="mb-1.5 inline-flex items-center gap-1 rounded-full bg-[color:var(--gold)]/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[color:var(--gold)]">
+                    <Sparkles className="h-2.5 w-2.5" /> AI
+                  </div>
+                )}
                 <p className="whitespace-pre-wrap text-sm leading-relaxed">{msg.content}</p>
               </div>
             </div>
@@ -421,11 +426,13 @@ export default function ChatPage() {
 
           {loading && (
             <div className="flex justify-start animate-in fade-in-0">
-              <div className="bg-muted rounded-xl px-4 py-3">
-                <div className="flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-full bg-primary animate-bounce [animation-delay:0ms]" />
-                  <span className="h-2 w-2 rounded-full bg-primary animate-bounce [animation-delay:150ms]" />
-                  <span className="h-2 w-2 rounded-full bg-primary animate-bounce [animation-delay:300ms]" />
+              <div className="glass-card rounded-2xl px-4 py-3">
+                <div className="flex items-center gap-2">
+                  <span
+                    className="h-3 w-3 rounded-full bg-[color:var(--gold)] shadow-[0_0_12px_oklch(0.78_0.16_80/0.7)]"
+                    style={{ animation: "pulse-orb 1.4s ease-in-out infinite" }}
+                  />
+                  <span className="text-xs text-muted-foreground">Thinking…</span>
                 </div>
               </div>
             </div>
@@ -435,19 +442,23 @@ export default function ChatPage() {
         </div>
 
         {/* Input */}
-        <form onSubmit={handleSubmit} className="flex gap-2 border-t p-3">
+        <form
+          onSubmit={handleSubmit}
+          className="flex gap-2 border-t border-white/10 p-3"
+        >
           <Input
             placeholder="Ask a question..."
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
             disabled={loading}
-            className="flex-1"
+            className="h-10 flex-1 rounded-full bg-white/40 px-4 backdrop-blur-md dark:bg-white/5 focus-visible:ring-[color:var(--purple-cta)]/40"
           />
           <Button
             type="submit"
+            variant="purple"
             size="icon"
             disabled={!question.trim() || loading}
-            className="cursor-pointer shrink-0 transition-all hover:shadow-lg hover:shadow-primary/25"
+            className="h-10 w-10 shrink-0 cursor-pointer rounded-full"
             aria-label="Send message"
           >
             <Send className="h-4 w-4" />

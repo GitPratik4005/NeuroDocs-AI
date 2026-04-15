@@ -9,6 +9,41 @@ Format:
 
 ## [Unreleased]
 
+### Added (V1 UI/UX — "Aurora Glass" redesign)
+- **Aurora Glass design system**: animated mesh-gradient backgrounds + glassmorphic cards
+  - `aurora-background.tsx` — full-screen animated radial gradients with `aurora-drift` keyframe (18s)
+  - `glass-card.tsx` — backdrop-blur translucent cards with optional mouse-based 3D tilt (Framer Motion `useMotionValue` + `useSpring`)
+  - Tailwind v4 custom utilities in `globals.css`: `glass-card`, `glass-panel`, `aurora-bg`, `aurora-veil`, `gold-text`
+- **Gold + Purple Tech palette**: OKLch tokens for light + dark themes
+  - Brand: `--gold`, `--gold-soft`, `--purple-cta`, `--purple-soft`
+  - Theme-aware gold gradient (`--gold-a/b/c`) with 6s shimmer animation
+  - Aurora stops (`--aurora-1..4`) and glass tokens flip between light/dark
+- **Framer Motion** (12.x) for orchestrated animations
+  - Shared variants in `lib/motion.ts`: `fadeIn`, `slideUp`, `staggerContainer`, `staggerItem`, `easeOut`
+  - Scroll reveals via `whileInView` + `viewport: { once: true }`
+  - Page-level mount transitions on auth + landing pages
+- **Typography swap**: Geist Sans → DM Sans (via `next/font/google`); Geist Mono retained for code
+- **Public landing page** (`/`): hero, description, 6-feature stagger grid, 3-step timeline, tech stack, CTA, footer
+- **Public About page** (`/about`): Functionalities (8 cards), Build information (4 categories), Milestones (MVP/V1/V2)
+- **Redesigned pages**:
+  - Auth (login/register): aurora background + glass card with 3D tilt + animated password rules
+  - Dashboard: gold-text hero, glass-wrapped table (desktop), staggered card grid (mobile)
+  - Chat: glass split panels, conversation sidebar with gold/purple active ring, purple user bubbles, pulsing gold orb loader (replaces bouncing dots), pill input with backdrop blur
+  - NavBar: floating glass pill (`sticky top-4`, rounded-full) with animated sun/moon toggle and `/about` link
+  - Drag-drop upload: gold border states, purple upload button
+- **Accessibility**: `prefers-reduced-motion` disables aurora drift, 3D tilt, stagger delays
+
+### Changed (V1 UI/UX)
+- `(app)/layout.tsx` wraps content with `AuroraBackground intensity="normal"` + floating NavBar
+- Button variants extended: added `gold`, `purple`, `glass`
+- Register button label: "Register" → "Create Account"
+- Drag-drop error message reflects CSV/XLSX support ("Only PDF, DOCX, CSV, and XLSX files are supported")
+- Updated Jest tests (`register.test.tsx`, `drag-drop-upload.test.tsx`) to match new copy
+
+### Fixed (V1 UI/UX)
+- Removed Lenis smooth-scroll provider: caused scroll stalls on Windows precision touchpads due to inertial wheel events. Native browser scrolling restored; Framer Motion scroll reveals unaffected.
+- Gold text / aurora invisibility in light mode: theme-aware OKLch gradient stops + reduced veil opacity so accents render richly on white background
+
 ### Added (V1)
 - **CSV/XLSX file support**: upload and query tabular data files
   - `csv_extractor.py` — converts CSV rows to readable pipe-separated text

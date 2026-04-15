@@ -66,7 +66,7 @@ describe("DragDropUpload", () => {
       dataTransfer: { files: [file] },
     });
 
-    expect(screen.getByText(/only pdf and docx/i)).toBeInTheDocument();
+    expect(screen.getByText(/only pdf, docx/i)).toBeInTheDocument();
   });
 
   test("rejects files over 10MB", async () => {

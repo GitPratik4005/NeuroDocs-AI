@@ -28,7 +28,7 @@ describe("RegisterPage", () => {
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
     expect(screen.getByLabelText("Password")).toBeInTheDocument();
     expect(screen.getByLabelText(/confirm password/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /register/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /create account/i })).toBeInTheDocument();
   });
 
   test("shows password requirements when typing", async () => {
@@ -60,7 +60,7 @@ describe("RegisterPage", () => {
     await user.type(screen.getByLabelText(/email/i), "test@example.com");
     await user.type(screen.getByLabelText("Password"), "password123");
     await user.type(screen.getByLabelText(/confirm password/i), "password123");
-    await user.click(screen.getByRole("button", { name: /register/i }));
+    await user.click(screen.getByRole("button", { name: /create account/i }));
 
     await waitFor(() => {
       expect(mockRegister).toHaveBeenCalledWith("test@example.com", "password123", "Test User");
@@ -76,7 +76,7 @@ describe("RegisterPage", () => {
     await user.type(screen.getByLabelText(/email/i), "t@t.com");
     await user.type(screen.getByLabelText("Password"), "short");
     await user.type(screen.getByLabelText(/confirm password/i), "short");
-    await user.click(screen.getByRole("button", { name: /register/i }));
+    await user.click(screen.getByRole("button", { name: /create account/i }));
 
     expect(mockRegister).not.toHaveBeenCalled();
     expect(screen.getByText(/does not meet requirements/i)).toBeInTheDocument();

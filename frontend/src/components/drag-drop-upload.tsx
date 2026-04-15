@@ -103,14 +103,14 @@ export function DragDropUpload({ onUploadComplete }: DragDropUploadProps) {
         onDrop={onDrop}
         onClick={() => !file && inputRef.current?.click()}
         className={`
-          relative flex flex-col items-center justify-center gap-3
-          rounded-xl border-2 border-dashed p-10 cursor-pointer
-          transition-all duration-300 ease-in-out
+          group/drop relative flex flex-col items-center justify-center gap-3
+          rounded-2xl border-2 border-dashed p-10 cursor-pointer glass-card
+          transition-[border-color,box-shadow,background-color] duration-300 ease-out
           ${dragOver
-            ? "border-primary bg-primary/10 scale-[1.01] shadow-lg shadow-primary/20"
+            ? "border-[color:var(--gold)] shadow-[0_0_40px_-8px_oklch(0.78_0.16_80/0.6)]"
             : file
-              ? "border-primary/50 bg-primary/5"
-              : "border-border hover:border-primary/40 hover:bg-accent/50"
+              ? "border-[color:var(--gold)]/60"
+              : "border-[color:var(--gold)]/30 hover:border-[color:var(--gold)]/70 hover:shadow-[0_0_24px_-10px_oklch(0.78_0.16_80/0.45)]"
           }
         `}
       >
@@ -127,7 +127,7 @@ export function DragDropUpload({ onUploadComplete }: DragDropUploadProps) {
 
         {file ? (
           <div className="flex items-center gap-3">
-            <FileText className="h-8 w-8 text-primary" />
+            <FileText className="h-8 w-8 text-[color:var(--gold)]" />
             <div>
               <p className="font-medium">{file.name}</p>
               <p className="text-sm text-muted-foreground">
@@ -146,8 +146,8 @@ export function DragDropUpload({ onUploadComplete }: DragDropUploadProps) {
           </div>
         ) : (
           <>
-            <div className="rounded-full bg-primary/10 p-4">
-              <Upload className="h-8 w-8 text-primary" />
+            <div className="rounded-full bg-[color:var(--gold)]/10 p-4 ring-1 ring-[color:var(--gold)]/25 transition-shadow group-hover/drop:shadow-[0_0_24px_oklch(0.78_0.16_80/0.4)]">
+              <Upload className="h-8 w-8 text-[color:var(--gold)]" />
             </div>
             <div className="text-center">
               <p className="font-medium">
@@ -179,11 +179,12 @@ export function DragDropUpload({ onUploadComplete }: DragDropUploadProps) {
           <Button
             onClick={handleUpload}
             disabled={uploading}
-            className="cursor-pointer px-6 transition-all hover:shadow-lg hover:shadow-primary/25"
+            variant="purple"
+            className="cursor-pointer px-6"
           >
             {uploading ? (
               <span className="flex items-center gap-2">
-                <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
                 Uploading...
               </span>
             ) : (

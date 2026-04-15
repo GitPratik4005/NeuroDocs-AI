@@ -69,6 +69,16 @@ V1
   - Backend: Conversation + ConversationMessage models, CRUD API
   - Frontend: conversation list in sidebar, auto-create, load history, save messages
 - **V1 tests** — 48 unit tests passing (CSV, OCR, smart chunking, BM25, reranker)
+- **V1 UI/UX redesign — "Aurora Glass"**
+  - Gold + Purple Tech palette (OKLch, theme-aware light/dark)
+  - Animated aurora mesh-gradient backgrounds
+  - Glassmorphic cards with mouse-based 3D tilt (auth pages)
+  - Framer Motion for scroll reveals + page transitions
+  - DM Sans typography
+  - Public landing page (`/`) and public About page (`/about`)
+  - Redesigned auth, dashboard, chat, nav bar, drag-drop upload
+  - `prefers-reduced-motion` compliance
+  - Lenis smooth scroll removed (caused touchpad stalls)
 
 ---
 

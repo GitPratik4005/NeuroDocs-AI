@@ -117,31 +117,42 @@ Configuration via `.env` file at project root (not committed to git).
 
 ### Frontend (`frontend/`)
 - Next.js 16 App Router with TypeScript
-- Tailwind CSS v4 for styling
-- shadcn/ui for UI components
-- next-themes for dark/light/system theme toggle
-- Default theme: dark (semi-dark premium with violet/blue accent)
+- Tailwind CSS v4 for styling (custom `@utility` blocks for glass + aurora)
+- shadcn/ui + Base UI primitives (note: `@base-ui/react/button` does NOT support `asChild` — use `buttonVariants()` + `<Link>`)
+- next-themes for dark/light/system theme toggle (default: dark)
+- **Framer Motion** for orchestrated animations (page transitions, scroll reveals, stagger, 3D tilt)
+- **Typography**: DM Sans (body/headings) + Geist Mono (code)
+- **Design system**: "Aurora Glass" — animated mesh-gradient backgrounds + glassmorphic cards + Gold + Purple Tech OKLch palette
 
 #### Pages (Route Groups)
-- `(auth)/login` — public login page (dark-themed)
-- `(auth)/register` — public registration page (live password validation)
-- `(app)/dashboard` — main page: hero + drag-drop upload + document list
-- `(app)/chat` — split view: document preview (left 30%) + chat window (right 70%)
+- `/` — public landing page (hero, features grid, how-it-works timeline, tech stack, CTA)
+- `/about` — public About page (functionalities, build info, milestones)
+- `(auth)/login` — glass card with aurora background + 3D tilt on hover
+- `(auth)/register` — same treatment + animated password rules via AnimatePresence
+- `(app)/dashboard` — aurora bg + glass hero + glass-wrapped table (desktop) / stagger card grid (mobile)
+- `(app)/chat` — glass split view: document preview (left) + chat window (right) with conversation sidebar
 
 #### Chat Features
 - **Streaming responses** — SSE-based token streaming (`/api/query/stream`), renders tokens in real-time
 - **Conversation persistence** — sessions saved per document, resume from sidebar
 - Predefined actions: Summarize, Key Points, Change Tone (dropdown: Professional/Casual/Academic/Simple)
 - Queries scoped to selected document via doc_id
-- Auto-scroll, bouncing dots loading animation
+- Auto-scroll, pulsing gold orb loading indicator
 
 #### Structure
-- `src/components/` → UI components (shadcn-based) + auth-guard, nav-bar, theme-provider, theme-toggle, drag-drop-upload
+- `src/components/` → UI components (shadcn + Base UI) + auth-guard, nav-bar (floating glass pill), theme-provider, theme-toggle, drag-drop-upload, **aurora-background**, **ui/glass-card**
+- `src/components/motion/` → `fade-in.tsx`, `stagger-list.tsx` (scroll-reveal wrappers)
 - `src/context/auth-context.tsx` → JWT auth state management
 - `src/services/api.ts` → backend API calls (native fetch)
 - `src/types/index.ts` → TypeScript interfaces matching backend schemas
-- `src/lib/` → shared utilities
+- `src/lib/` → `utils.ts` (cn helper), `motion.ts` (shared Framer Motion variants)
+- `src/app/globals.css` → Tailwind v4 theme tokens + `@utility glass-card`, `glass-panel`, `aurora-bg`, `aurora-veil`, `gold-text` + keyframes (`aurora-drift`, `gold-shimmer`, `pulse-orb`) + `prefers-reduced-motion` overrides
 - `src/__tests__/` → Jest + React Testing Library tests
+
+#### Design Notes
+- Lenis smooth scroll was removed: caused scroll stalls on Windows precision touchpads. Use native scroll + Framer Motion `whileInView` for reveals.
+- All animations respect `prefers-reduced-motion` via CSS media query in `globals.css`
+- Button variants: `gold`, `purple`, `glass` (in addition to shadcn defaults)
 
 ### Tests (`tests/`)
 - `tests/backend/` → pytest tests (unit + API + RAG)
@@ -169,7 +180,9 @@ Configuration via `.env` file at project root (not committed to git).
 - **Keyword Search**: rank_bm25 in-memory (migrate to PostgreSQL tsvector in V2 if needed)
 - **Retrieval**: Hybrid (vector + BM25 RRF) → LLM reranking → answer generation
 - **Chunking**: Smart (heading/paragraph-aware) for PDF/DOCX, naive for CSV/XLSX
-- **UI**: Use shadcn/ui components with Tailwind CSS
+- **UI**: shadcn/ui + Base UI primitives with Tailwind CSS v4
+- **Design system**: "Aurora Glass" — glassmorphism + animated aurora backgrounds + Gold/Purple OKLch palette
+- **Animations**: Framer Motion (orchestrated reveals, 3D tilt, page transitions). Native scroll — Lenis was removed due to touchpad stalls.
 - **Theming**: next-themes for dark/light/system toggle (default: dark)
 - **Frontend Testing**: Jest + React Testing Library
 
