@@ -46,6 +46,5 @@ tests/backend/chroma_data/
 # Claude Code local settings
 .claude/settings.local.json
 
-# Knowledge (generated, can be regenerated)
-knowledge/code_explanations/
-knowledge/system_explanations/
+# Knowledge (local-only, not tracked in git)
+knowledge/
